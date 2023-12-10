@@ -1,0 +1,41 @@
+version: '3'
+
+volumes:
+  florist_local_postgres_data: {}
+  florist_local_postgres_data_backups: {}
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: florist_local_django
+    container_name: florist_local_django
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./src:/app:z
+    env_file:
+      - ./.envs/.local/.env
+    ports:
+      - '8000:8000'
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/local/postgres/Dockerfile
+    image: florist_local_postgres
+    container_name: florist_local_postgres
+    volumes:
+      - florist_local_postgres_data:/var/lib/postgresql/data
+      - florist_local_postgres_data_backups:/backups
+    env_file:
+      - ./.envs/.local/.env
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:6
+    container_name: django_florist_local_redis
