@@ -3,6 +3,7 @@ version: '3'
 volumes:
   florist_local_postgres_data: {}
   florist_local_postgres_data_backups: {}
+  florist_local_redis_cache: {}
 
 services:
   django:
@@ -39,3 +40,5 @@ services:
   redis:
     image: redis:6
     container_name: django_florist_local_redis
+    volumes:
+      - florist_local_redis_cache:/data
