@@ -19,6 +19,8 @@ services:
       - ./src:/app:z
     env_file:
       - ./.envs/.local/.env
+    environment:
+      - TZ=Europe/Moscow
     ports:
       - '8000:8000'
     command: /start
@@ -34,6 +36,8 @@ services:
       - florist_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.env
+    environment:
+      - TZ=Europe/Moscow
     ports:
       - '5432:5432'
 
@@ -42,3 +46,5 @@ services:
     container_name: django_florist_local_redis
     volumes:
       - florist_local_redis_cache:/data
+    environment:
+      - TZ=Europe/Moscow
