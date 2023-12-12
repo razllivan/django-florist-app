@@ -41,3 +41,9 @@ class Product(models.Model):
     )
     sizes = models.ManyToManyField(Size, through="ProductSize")
     images = models.ManyToManyField(Image, through="ProductImage")
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    image = models.ForeignKey(Image, on_delete=models.CASCADE)
+    is_preview = models.BooleanField(default=False)
