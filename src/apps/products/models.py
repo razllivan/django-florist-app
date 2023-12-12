@@ -17,3 +17,7 @@ class Category(models.Model):
         return Category.objects.get_or_create(
             name="Без категории", is_active=False
         )[0]
+
+
+class Size(models.Model):
+    name = models.CharField(max_length=50)
