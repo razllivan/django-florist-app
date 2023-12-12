@@ -21,3 +21,7 @@ class Category(models.Model):
 
 class Size(models.Model):
     name = models.CharField(max_length=50)
+
+
+class Image(models.Model):
+    img = models.ImageField(upload_to="images/")
