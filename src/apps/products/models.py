@@ -16,7 +16,11 @@ class CatalogItemBase(models.Model):
 
 class Category(CatalogItemBase):
     parent_category = models.ForeignKey(
-        "self", on_delete=models.SET_NULL, blank=True, null=True
+        "self",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="child_categories",
     )
 
     @staticmethod
