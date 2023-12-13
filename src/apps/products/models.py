@@ -2,12 +2,19 @@ from autoslug import AutoSlugField
 from django.db import models
 
 
-class Category(models.Model):
+class CatalogItemBase(models.Model):
     name = models.CharField(max_length=200)
     slug = AutoSlugField(
         populate_from="name", unique=True, db_index=True, always_update=True
     )
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["name"]
+
+
+class Category(CatalogItemBase):
     parent_category = models.ForeignKey(
         "self", on_delete=models.SET_NULL, blank=True, null=True
     )
@@ -27,14 +34,9 @@ class Image(models.Model):
     img = models.ImageField(upload_to="images/")
 
 
-class Product(models.Model):
-    name = models.CharField(max_length=200)
+class Product(CatalogItemBase):
     description = models.TextField()
     size_description = models.CharField(max_length=100, blank=True, null=True)
-    slug = AutoSlugField(
-        populate_from="name", unique=True, db_index=True, always_update=True
-    )
-    is_active = models.BooleanField(default=True)
     is_archived = models.BooleanField(default=False)
     category = models.ForeignKey(
         Category, on_delete=models.SET(Category.get_default_category)
