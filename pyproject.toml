@@ -21,6 +21,7 @@ black = "^23.11.0"
 isort = "^5.13.0"
 flake8-pyproject = "^1.2.3"
 pre-commit = "^3.6.0"
+pytest-django = "^4.7.0"
 
 [tool.flake8]
 max-line-length = 79
@@ -37,6 +38,14 @@ profile = "black"
 line_length = 79
 skip = ["venv/"]
 skip_glob = ["**/migrations/*.py"]
+
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "src.config.settings"
+python_files = [
+    "tests.py",
+    "test_*.py",
+]
 
 [build-system]
 requires = ["poetry-core"]
