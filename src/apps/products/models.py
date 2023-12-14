@@ -54,6 +54,19 @@ class ProductImage(models.Model):
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
     is_preview = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        """
+        If the instance is a preview,
+        it updates the preview status of all other previews of the same
+        product to False.
+        """
+        if self.is_preview:
+            self.__class__.objects.filter(
+                product=self.product, is_preview=True
+            ).update(is_preview=False)
+
+        super().save(*args, **kwargs)
+
 
 class ProductSize(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
