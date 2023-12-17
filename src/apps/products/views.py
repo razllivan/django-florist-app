@@ -1,7 +1,11 @@
 from rest_framework.viewsets import ModelViewSet
 
-from apps.products.models import Category, Size
-from apps.products.serializers import CategorySerializer, SizeSerializer
+from apps.products.models import Category, Image, Size
+from apps.products.serializers import (
+    CategorySerializer,
+    ImageSerializer,
+    SizeSerializer,
+)
 
 
 class CategoryViewSet(ModelViewSet):
@@ -13,3 +17,8 @@ class CategoryViewSet(ModelViewSet):
 class SizeViewSet(ModelViewSet):
     queryset = Size.objects.all()
     serializer_class = SizeSerializer
+
+
+class ImageViewSet(ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
