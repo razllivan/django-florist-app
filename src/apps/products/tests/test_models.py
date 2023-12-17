@@ -13,14 +13,14 @@ def test_get_default_category():
     """
     category1 = Category.get_default_category()
     assert category1.name == "Без категории"
-    assert not category1.is_active
+    assert category1.is_active is False
 
     category2 = Category.get_default_category()
     assert category1.id == category2.id
 
 
 @pytest.mark.django_db
-def test_product_image_save(mock_image_save):
+def test_only_one_image_per_product_as_preview(mock_image_save):
     """
     Test the 'preview' functionality of the `ProductImage` model.
     It asserts that only one image per product can be set as 'preview'.
@@ -35,5 +35,5 @@ def test_product_image_save(mock_image_save):
     image2 = ProductImageFactory(product=product, is_preview=True)
     image1.refresh_from_db()
 
-    assert not image1.is_preview
+    assert image1.is_preview is False
     assert image2.is_preview
