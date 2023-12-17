@@ -4,8 +4,8 @@ from apps.products.models import Category, Image, Size
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    child_categories = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
+    child_categories = serializers.PrimaryKeyRelatedField(
+        many=True, read_only=True
     )
 
     class Meta:
