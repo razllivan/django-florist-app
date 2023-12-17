@@ -23,9 +23,9 @@ class Category(CatalogItemBase):
         related_name="child_categories",
     )
 
-    @staticmethod
-    def get_default_category():
-        return Category.objects.get_or_create(
+    @classmethod
+    def get_default_category(cls):
+        return cls.objects.get_or_create(
             name="Без категории", is_active=False
         )[0]
 
