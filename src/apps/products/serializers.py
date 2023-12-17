@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.products.models import Category
+from apps.products.models import Category, Size
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -10,4 +10,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
+        fields = "__all__"
+
+
+class SizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Size
         fields = "__all__"
