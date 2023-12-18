@@ -13,6 +13,10 @@ class ImagesInline(admin.TabularInline):
     model = Product.images.through
 
 
+class CategoryInline(admin.TabularInline):
+    model = Product.categories.through
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     fields = (
@@ -22,11 +26,11 @@ class ProductAdmin(admin.ModelAdmin):
         "is_archived",
         "description",
         "size_description",
-        "category",
     )
     inlines = [
+        CategoryInline,
         SizesInline,
         ImagesInline,
     ]
-    exclude = ["sizes", "images"]
+    exclude = ["sizes", "images", "categories"]
     readonly_fields = ("slug",)
