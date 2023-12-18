@@ -11,7 +11,6 @@ class CatalogItemBase(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ["name"]
 
 
 class Category(CatalogItemBase):
