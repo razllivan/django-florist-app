@@ -53,8 +53,7 @@ class Product(CatalogItemBase):
     size_description = models.CharField(max_length=100, blank=True, null=True)
     is_archived = models.BooleanField(default=False)
     categories = models.ManyToManyField(
-        Category,
-        default=Category.get_default_category,
+        Category, default=Category.get_default_category, blank=True
     )
     sizes = models.ManyToManyField(Size, through="ProductSize")
     images = models.ManyToManyField(Image, through="ProductImage")
