@@ -1,3 +1,5 @@
+import os
+
 from autoslug import AutoSlugField
 from django.db import models
 
@@ -28,13 +30,22 @@ class Category(CatalogItemBase):
             name="Без категории", is_active=False
         )[0]
 
+    def __str__(self):
+        return self.name
+
 
 class Size(models.Model):
     name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.name
+
 
 class Image(models.Model):
     img = models.ImageField(upload_to="images/")
+
+    def __str__(self):
+        return os.path.basename(self.img.name)
 
 
 class Product(CatalogItemBase):
@@ -47,6 +58,9 @@ class Product(CatalogItemBase):
     )
     sizes = models.ManyToManyField(Size, through="ProductSize")
     images = models.ManyToManyField(Image, through="ProductImage")
+
+    def __str__(self):
+        return self.name
 
 
 class ProductImage(models.Model):
