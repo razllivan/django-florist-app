@@ -1,3 +1,4 @@
+import factory
 from factory import Faker, Sequence, SubFactory
 from factory.django import DjangoModelFactory, ImageField
 
@@ -23,7 +24,14 @@ class ProductFactory(DjangoModelFactory):
         model = Product
 
     description = Faker("text")
-    category = SubFactory(CategoryFactory)
+
+    @factory.post_generation
+    def categories(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            # Simple build, or nothing to add, do nothing.
+            return
+        # Add the iterable of categories using bulk addition
+        self.categories.add(*extracted)
 
 
 class ProductImageFactory(DjangoModelFactory):
