@@ -27,8 +27,12 @@ class ProductWriteSerializer(ModelSerializer):
     categories = PrimaryKeyRelatedField(
         many=True, required=False, queryset=Category.objects.all()
     )
-    sizes = SizeSerializer(many=True)
-    images = ImageSerializer(many=True)
+    sizes = PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Size.objects.all()
+    )
+    images = PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Image.objects.all()
+    )
 
     class Meta:
         model = Product
@@ -37,3 +41,5 @@ class ProductWriteSerializer(ModelSerializer):
 
 class ProductReadSerializer(ProductWriteSerializer):
     categories = CategorySerializer(many=True)
+    sizes = SizeSerializer(many=True)
+    images = ImageSerializer(many=True)
