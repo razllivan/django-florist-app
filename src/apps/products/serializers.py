@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.products.models import Category, Image, Size
+from apps.products.models import Category, Image, Product, Size
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -23,3 +23,19 @@ class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = "__all__"
+
+
+class ProductWriteSerializer(serializers.ModelSerializer):
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Category.objects.all()
+    )
+    sizes = SizeSerializer(many=True)
+    images = ImageSerializer(many=True)
+
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+
+class ProductReadSerializer(ProductWriteSerializer):
+    categories = CategorySerializer(many=True)
