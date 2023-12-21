@@ -13,7 +13,7 @@ from apps.products.serializers import (
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filterset_fields = ("is_active", "parent_category")
+    filterset_fields = ("is_active", "parent_category", "slug")
 
 
 class SizeViewSet(ModelViewSet):
