@@ -9,7 +9,7 @@ class CatalogItemBase(models.Model):
     slug = AutoSlugField(
         populate_from="name", unique=True, db_index=True, always_update=True
     )
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, db_index=True)
 
     class Meta:
         abstract = True
@@ -49,14 +49,14 @@ class Image(models.Model):
 
 
 class Product(CatalogItemBase):
-    description = models.TextField()
-    size_description = models.CharField(max_length=100, blank=True, null=True)
-    is_archived = models.BooleanField(default=False)
+    description = models.TextField(blank=True)
+    size_description = models.CharField(max_length=100, blank=True)
+    is_archived = models.BooleanField(default=False, db_index=True)
     categories = models.ManyToManyField(
         Category, default=Category.get_default_category, blank=True
     )
-    sizes = models.ManyToManyField(Size, through="ProductSize")
-    images = models.ManyToManyField(Image, through="ProductImage")
+    sizes = models.ManyToManyField(Size, through="ProductSize", blank=True)
+    images = models.ManyToManyField(Image, through="ProductImage", blank=True)
 
     def __str__(self):
         return self.name
@@ -65,7 +65,7 @@ class Product(CatalogItemBase):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     image = models.ForeignKey(Image, on_delete=models.CASCADE)
-    is_preview = models.BooleanField(default=False)
+    is_preview = models.BooleanField(default=False, db_index=True)
 
     def save(self, *args, **kwargs):
         """
@@ -85,4 +85,4 @@ class ProductSize(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     price = models.PositiveIntegerField()
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, db_index=True)
