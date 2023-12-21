@@ -26,7 +26,7 @@ class ProductFactory(DjangoModelFactory):
     description = Faker("text")
 
     @factory.post_generation
-    def categories(self, create, extracted, **kwargs):
+    def categories(self, create: bool, extracted: list, **kwargs):
         if not create or not extracted:
             # Simple build, or nothing to add, do nothing.
             return
