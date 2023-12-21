@@ -24,12 +24,6 @@ class Category(CatalogItemBase):
         related_name="child_categories",
     )
 
-    @classmethod
-    def get_default_category(cls):
-        return cls.objects.get_or_create(
-            name="Без категории", is_active=False
-        )[0]
-
     def __str__(self):
         return self.name
 
@@ -52,9 +46,7 @@ class Product(CatalogItemBase):
     description = models.TextField(blank=True)
     size_description = models.CharField(max_length=100, blank=True)
     is_archived = models.BooleanField(default=False, db_index=True)
-    categories = models.ManyToManyField(
-        Category, default=Category.get_default_category, blank=True
-    )
+    categories = models.ManyToManyField(Category, blank=True)
     sizes = models.ManyToManyField(Size, through="ProductSize", blank=True)
     images = models.ManyToManyField(Image, through="ProductImage", blank=True)
 
