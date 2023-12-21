@@ -98,9 +98,7 @@ class Migration(migrations.Migration):
                 (
                     "category",
                     models.ForeignKey(
-                        on_delete=models.SET(
-                            apps.products.models.Category.get_default_category
-                        ),
+                        on_delete=models.CASCADE,
                         to="products.category",
                     ),
                 ),

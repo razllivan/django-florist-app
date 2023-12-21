@@ -23,8 +23,7 @@ class Migration(migrations.Migration):
             model_name="product",
             name="category",
             field=models.ForeignKey(
-                default=apps.products.models.Category.get_default_category,
-                on_delete=django.db.models.deletion.SET_DEFAULT,
+                on_delete=models.CASCADE,
                 to="products.category",
             ),
         ),

@@ -18,8 +18,7 @@ class Migration(migrations.Migration):
             model_name="product",
             name="category",
             field=models.ManyToManyField(
-                default=apps.products.models.Category.get_default_category,
-                to="products.category",
+                 to="products.category",
             ),
         ),
     ]
