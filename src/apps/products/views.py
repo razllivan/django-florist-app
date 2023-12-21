@@ -28,6 +28,7 @@ class ImageViewSet(ModelViewSet):
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
+    filterset_fields = ("categories", "slug", "is_active", "is_archived")
 
     def get_serializer_class(self):
         if self.request.method in ["GET"]:
