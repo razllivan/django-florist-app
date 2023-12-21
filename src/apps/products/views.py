@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
+from apps.products.filters import ProductFilter
 from apps.products.models import Category, Image, Product, Size
 from apps.products.serializers import (
     CategorySerializer,
@@ -28,7 +29,7 @@ class ImageViewSet(ModelViewSet):
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
-    filterset_fields = ("categories", "slug", "is_active", "is_archived")
+    filterset_class = ProductFilter
 
     def get_serializer_class(self):
         if self.request.method in ["GET"]:
