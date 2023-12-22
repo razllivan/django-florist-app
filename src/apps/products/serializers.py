@@ -1,6 +1,11 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import (
+    ImageField,
+    IntegerField,
+    ModelSerializer,
+    PrimaryKeyRelatedField,
+)
 
-from apps.products.models import Category, Image, Product, Size
+from apps.products.models import Category, Image, Product, ProductImage, Size
 
 
 class CategorySerializer(ModelSerializer):
@@ -23,6 +28,15 @@ class ImageSerializer(ModelSerializer):
         fields = "__all__"
 
 
+class ProductImageSerializer(ModelSerializer):
+    id = IntegerField(source="image.id")
+    img = ImageField(source="image.img")
+
+    class Meta:
+        model = ProductImage
+        fields = ["id", "img", "is_preview"]
+
+
 class ProductWriteSerializer(ModelSerializer):
     categories = PrimaryKeyRelatedField(
         many=True, required=False, queryset=Category.objects.all()
@@ -42,4 +56,4 @@ class ProductWriteSerializer(ModelSerializer):
 class ProductReadSerializer(ProductWriteSerializer):
     categories = CategorySerializer(many=True)
     sizes = SizeSerializer(many=True)
-    images = ImageSerializer(many=True)
+    images = ProductImageSerializer(many=True, source="productimage_set")
