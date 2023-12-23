@@ -49,14 +49,6 @@ docker-compose -f local.yml up -d --build
 
 After the containers start, the project will be available at http://localhost:8000.
 
-### Production
-
-For deploying in a production environment, use the `production.yml`:
-
-docker-compose -f production.yml up -d --build
-
-Make sure you have configured all the necessary environment variables and settings for a secure and optimized production run.
-
 ## API Documentation
 
 After starting the project, the API documentation will be available at http://localhost:8000/api/docs.
