@@ -160,3 +160,7 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     )
 }
+
+SPECTACULAR_SETTINGS = {
+    'OAS_VERSION': '3.1.0',
+}
