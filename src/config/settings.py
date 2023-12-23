@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'django_filters',
+    'corsheaders',
 
     'apps.products',
 ]
@@ -54,6 +55,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'corsheaders.middleware.CorsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -164,3 +168,7 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     'OAS_VERSION': '3.1.0',
 }
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000'
+]
