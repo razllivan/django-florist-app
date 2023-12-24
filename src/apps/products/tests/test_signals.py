@@ -1,6 +1,13 @@
-import pytest
+import os
 
-from apps.products.tests.factories import CategoryFactory, ProductFactory
+import pytest
+from django.conf import settings
+
+from apps.products.tests.factories import (
+    CategoryFactory,
+    ImageFactory,
+    ProductFactory,
+)
 
 
 @pytest.mark.django_db
@@ -22,3 +29,18 @@ def test_add_parent_categories_on_add():
     assert category_child in product.categories.all()
     assert category_parent in product.categories.all()
     assert category_grandparent in product.categories.all()
+
+
+@pytest.mark.django_db
+def test_delete_image_file_on_instance_delete():
+    image = ImageFactory()
+    image_path = os.path.join(settings.MEDIA_ROOT, image.img.name)
+
+    # Check that the file exists in the filesystem
+    assert os.path.isfile(image_path)
+
+    # Delete the image instance
+    image.delete()
+
+    # Check that the file is also deleted from the filesystem
+    assert not os.path.isfile(image_path)
