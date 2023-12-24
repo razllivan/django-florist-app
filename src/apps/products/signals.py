@@ -1,6 +1,6 @@
 import os
 
-from django.db.models.signals import m2m_changed, post_delete
+from django.db.models.signals import m2m_changed, post_delete, pre_save
 from django.dispatch import receiver
 
 from apps.products.models import Image, Product
@@ -41,3 +41,22 @@ def delete_image_file_on_instance_delete(sender, instance, **kwargs):
     """
     if instance.img and os.path.isfile(instance.img.path):
         os.remove(instance.img.path)
+
+
+@receiver(pre_save, sender=Image)
+def delete_image_file_on_instance_change(sender, instance, **kwargs):
+    """
+    Deletes the old image file from filesystem when Image instance is updated.
+    """
+    # Exit if Image instance is new and not saved yet
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = Image.objects.get(pk=instance.pk).img
+    except Image.DoesNotExist:
+        return False
+
+    new_file = instance.img
+    if old_file != new_file and os.path.isfile(old_file.path):
+        os.remove(old_file.path)
