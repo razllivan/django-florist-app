@@ -33,6 +33,10 @@ def test_add_parent_categories_on_add():
 
 @pytest.mark.django_db
 def test_delete_image_file_on_instance_delete():
+    """
+    Test that the image file is deleted from the filesystem when the
+    Image model instance's file field is deleted.
+    """
     image = ImageFactory()
     image_path = os.path.join(settings.MEDIA_ROOT, image.img.name)
 
