@@ -36,7 +36,7 @@ def add_parent_categories_on_add(sender, instance, action, **kwargs):
 @receiver(post_delete, sender=Image)
 def delete_image_file_on_instance_delete(sender, instance, **kwargs):
     """
-    Deletes file from filesystem
+    Deletes old image file from filesystem
     when corresponding `Image` object is deleted.
     """
     if instance.img and os.path.isfile(instance.img.path):
