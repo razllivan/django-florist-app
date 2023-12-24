@@ -1,7 +1,9 @@
-from django.db.models.signals import m2m_changed
+import os
+
+from django.db.models.signals import m2m_changed, post_delete
 from django.dispatch import receiver
 
-from apps.products.models import Product
+from apps.products.models import Image, Product
 
 
 @receiver(m2m_changed, sender=Product.categories.through)
@@ -29,3 +31,13 @@ def add_parent_categories_on_add(sender, instance, action, **kwargs):
                     new_parents.add(parent)
                 parent = parent.parent_category
         instance.categories.add(*new_parents)
+
+
+@receiver(post_delete, sender=Image)
+def delete_image_file_on_instance_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `Image` object is deleted.
+    """
+    if instance.img and os.path.isfile(instance.img.path):
+        os.remove(instance.img.path)
