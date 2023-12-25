@@ -40,7 +40,7 @@ def delete_image_file_on_instance_delete(sender, instance, **kwargs):
     when corresponding `Image` object is deleted.
     """
     if instance.img and os.path.isfile(instance.img.path):
-        os.remove(instance.img.path)
+        instance.img.delete(save=False)
 
 
 @receiver(pre_save, sender=Image)
@@ -53,10 +53,10 @@ def delete_image_file_on_instance_change(sender, instance, **kwargs):
         return False
 
     try:
-        old_file = Image.objects.get(pk=instance.pk).img
-    except Image.DoesNotExist:
+        old_file = sender.objects.get(pk=instance.pk).img
+    except sender.DoesNotExist:
         return False
 
     new_file = instance.img
     if old_file != new_file and os.path.isfile(old_file.path):
-        os.remove(old_file.path)
+        old_file.delete(save=False)
