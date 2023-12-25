@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
@@ -28,6 +29,9 @@ class SizeViewSet(ModelViewSet):
     serializer_class = SizeSerializer
 
 
+@extend_schema_view(
+    create=extend_schema(request={"multipart/form-data": ImageSerializer})
+)
 class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
