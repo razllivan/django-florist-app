@@ -34,6 +34,7 @@ class ImageViewSet(ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     parser_classes = (MultiPartParser,)
+    http_method_names = ["get", "post", "put", "delete"]
 
 
 class ProductViewSet(ModelViewSet):
