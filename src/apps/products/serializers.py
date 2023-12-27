@@ -1,6 +1,5 @@
 from rest_framework.serializers import (
     ImageField,
-    IntegerField,
     ModelSerializer,
     PrimaryKeyRelatedField,
 )
@@ -29,12 +28,31 @@ class ImageSerializer(ModelSerializer):
 
 
 class ProductImageSerializer(ModelSerializer):
-    id = IntegerField(source="image.id")
-    img = ImageField(source="image.img")
+    image = ImageSerializer(read_only=True)
+    new_image = ImageField(write_only=True)
+
+    def create(self, validated_data):
+        return self._create_or_update_image(validated_data)
+
+    def update(self, instance, validated_data):
+        return self._create_or_update_image(validated_data)
+
+    def _create_or_update_image(self, validated_data):
+        # sourcery skip: use-named-expression
+        new_image = validated_data.pop("new_image", None)
+        if new_image:
+            image_instance = Image.objects.create(img=new_image)
+            validated_data["image"] = image_instance
+        return super().create(validated_data)
 
     class Meta:
         model = ProductImage
-        fields = ["id", "img", "is_preview"]
+        fields = [
+            "new_image",
+            "image",
+            "is_preview",
+        ]
+        depth = 1
 
 
 class ProductWriteSerializer(ModelSerializer):
