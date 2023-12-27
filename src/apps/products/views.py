@@ -9,7 +9,7 @@ from apps.products.serializers import (
     ImageSerializer,
     ProductReadSerializer,
     ProductWriteSerializer,
-    SizeSerializer,
+    ProductSerializer,
 )
 
 
@@ -51,6 +51,8 @@ class ProductViewSet(ModelViewSet):
 
     queryset = Product.objects.all()
     filterset_class = ProductFilter
+    serializer_class = ProductSerializer
+
 
     def get_serializer_class(self):
         if self.request.method in ["GET"]:
