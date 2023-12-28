@@ -2,11 +2,11 @@ import pytest
 
 from apps.products.filters import ProductFilter
 from apps.products.models import Product
-from apps.products.tests.factories import CategoryFactory, ProductFactory
+from apps.products.tests.factories import ProductFactory
 
 
 @pytest.mark.django_db
-def test_no_categories_filter_excludes_categorized_products():
+def test_no_categories_filter_excludes_categorized_products(category):
     """
     Test 'no_categories' filter functionality for products.
 
@@ -14,8 +14,6 @@ def test_no_categories_filter_excludes_categorized_products():
     Product queryset, it returns only the products without any associated
     categories, and excludes those with associated categories.
     """
-    category = CategoryFactory()
-
     # create products with categories and without
     product_with_category = ProductFactory(
         name="With category", categories=[category]
