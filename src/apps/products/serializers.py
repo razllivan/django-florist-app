@@ -60,23 +60,29 @@ class ProductImageSerializer(ModelSerializer):
         depth = 1
 
 
-class ProductWriteSerializer(ModelSerializer):
-    categories = PrimaryKeyRelatedField(
-        many=True, required=False, queryset=Category.objects.all()
+class ProductSerializer(ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
+    sizes = SizeSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(
+        many=True, source="productimage_set", read_only=True
     )
-    sizes = PrimaryKeyRelatedField(
-        many=True, required=False, queryset=Size.objects.all()
+
+    categories_ids = PrimaryKeyRelatedField(
+        many=True,
+        required=False,
+        queryset=Category.objects.all(),
+        write_only=True,
     )
-    images = PrimaryKeyRelatedField(
-        many=True, required=False, queryset=Image.objects.all()
+    sizes_ids = PrimaryKeyRelatedField(
+        many=True, required=False, queryset=Size.objects.all(), write_only=True
+    )
+    images_ids = PrimaryKeyRelatedField(
+        many=True,
+        required=False,
+        queryset=Image.objects.all(),
+        write_only=True,
     )
 
     class Meta:
         model = Product
         fields = "__all__"
-
-
-class ProductReadSerializer(ProductWriteSerializer):
-    categories = CategorySerializer(many=True)
-    sizes = SizeSerializer(many=True)
-    images = ProductImageSerializer(many=True, source="productimage_set")
