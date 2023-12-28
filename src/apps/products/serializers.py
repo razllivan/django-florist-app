@@ -35,15 +35,20 @@ class ProductImageSerializer(ModelSerializer):
         return self._create_or_update_image(validated_data)
 
     def update(self, instance, validated_data):
-        return self._create_or_update_image(validated_data)
+        return self._create_or_update_image(validated_data, instance)
 
-    def _create_or_update_image(self, validated_data):
+    def _create_or_update_image(self, validated_data, instance=None):
         # sourcery skip: use-named-expression
         new_image = validated_data.pop("new_image", None)
         if new_image:
             image_instance = Image.objects.create(img=new_image)
             validated_data["image"] = image_instance
-        return super().create(validated_data)
+        if instance:
+            instance.image = validated_data.get("image", instance.image)
+            instance.save()
+            return super().update(instance, validated_data)
+        else:
+            return super().create(validated_data)
 
     class Meta:
         model = ProductImage
