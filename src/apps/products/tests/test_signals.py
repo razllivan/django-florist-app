@@ -3,15 +3,11 @@ import os
 import pytest
 from django.conf import settings
 
-from apps.products.tests.factories import (
-    CategoryFactory,
-    ImageFactory,
-    ProductFactory,
-)
+from apps.products.tests.factories import CategoryFactory, ImageFactory
 
 
 @pytest.mark.django_db
-def test_add_parent_categories_on_add():
+def test_add_parent_categories_on_add(product):
     """
     Test if adding a child category to a product
     also adds its parent category and grandparent catergory.
@@ -21,8 +17,7 @@ def test_add_parent_categories_on_add():
     category_parent = CategoryFactory(parent_category=category_grandparent)
     category_child = CategoryFactory(parent_category=category_parent)
 
-    # Create the product and add the child category
-    product = ProductFactory()
+    # Add the child category to product
     product.categories.add(category_child)
     product.refresh_from_db()
 
@@ -32,12 +27,11 @@ def test_add_parent_categories_on_add():
 
 
 @pytest.mark.django_db
-def test_delete_image_file_on_instance_delete():
+def test_delete_image_file_on_instance_delete(image):
     """
     Test that the image file is deleted from the filesystem when the
     Image model instance's file field is deleted.
     """
-    image = ImageFactory()
     image_path = os.path.join(settings.MEDIA_ROOT, image.img.name)
 
     # Check that the file exists in the filesystem
@@ -51,12 +45,11 @@ def test_delete_image_file_on_instance_delete():
 
 
 @pytest.mark.django_db
-def test_delete_image_file_on_instance_change():
+def test_delete_image_file_on_instance_change(image):
     """
     Test that the image file is deleted from the filesystem when the
     Image model instance's file field is updated.
     """
-    image = ImageFactory()
     old_image_path = os.path.join(settings.MEDIA_ROOT, image.img.name)
 
     # Check that the file exists in the filesystem
