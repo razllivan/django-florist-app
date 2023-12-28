@@ -35,10 +35,10 @@ def product(db):
 
 
 @pytest.fixture
-def image_no_save(db, mock_image_save):
+def image_no_save_file(db, mock_image_save):
     return ImageFactory
 
 
 @pytest.fixture
-def product_image_no_save(db, mock_image_save):
+def product_image_no_save_file(db, mock_image_save):
     return ProductImageFactory()
