@@ -2,6 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from apps.products.tests.factories import (
+    CategoryFactory,
     ImageFactory,
     ProductFactory,
     ProductImageFactory,
@@ -35,6 +36,11 @@ def product(db):
 
 
 @pytest.fixture
+def image(db):
+    return ImageFactory()
+
+
+@pytest.fixture
 def image_no_save_file(db, mock_image_save):
     return ImageFactory
 
@@ -42,3 +48,8 @@ def image_no_save_file(db, mock_image_save):
 @pytest.fixture
 def product_image_no_save_file(db, mock_image_save):
     return ProductImageFactory()
+
+
+@pytest.fixture
+def category(db):
+    return CategoryFactory()
