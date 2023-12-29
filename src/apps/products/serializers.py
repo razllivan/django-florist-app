@@ -32,23 +32,20 @@ class ProductImageSerializer(ModelSerializer):
     new_image = ImageField(write_only=True)
 
     def create(self, validated_data):
-        return self._create_or_update_image(validated_data)
+        new_image_data = validated_data.pop("new_image")
+        image_instance = Image.objects.create(img=new_image_data)
+        validated_data["image"] = image_instance
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        return self._create_or_update_image(validated_data, instance)
-
-    def _create_or_update_image(self, validated_data, instance=None):
         # sourcery skip: use-named-expression
-        new_image = validated_data.pop("new_image", None)
-        if new_image:
-            image_instance = Image.objects.create(img=new_image)
-            validated_data["image"] = image_instance
-        if instance:
-            instance.image = validated_data.get("image", instance.image)
-            instance.save()
-            return super().update(instance, validated_data)
-        else:
-            return super().create(validated_data)
+        new_image_data = validated_data.pop("new_image", None)
+
+        if new_image_data:
+            image_instance = Image.objects.create(img=new_image_data)
+            instance.image = image_instance
+        instance.save()
+        return super().update(instance, validated_data)
 
     class Meta:
         model = ProductImage
