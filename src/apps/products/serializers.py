@@ -5,7 +5,14 @@ from rest_framework.serializers import (
     PrimaryKeyRelatedField,
 )
 
-from apps.products.models import Category, Image, Product, ProductImage, Size
+from apps.products.models import (
+    Category,
+    Image,
+    Product,
+    ProductImage,
+    ProductSize,
+    Size,
+)
 
 
 class CategorySerializer(ModelSerializer):
@@ -20,6 +27,18 @@ class SizeSerializer(ModelSerializer):
     class Meta:
         model = Size
         fields = "__all__"
+
+
+class ProductSizeSerializer(ModelSerializer):
+    size = SizeSerializer(read_only=True)
+
+    class Meta:
+        model = ProductSize
+        fields = [
+            "size",
+            "price",
+            "is_active",
+        ]
 
 
 class ImageSerializer(ModelSerializer):
@@ -81,7 +100,9 @@ class ProductImageSerializer(ModelSerializer):
 
 class ProductSerializer(ModelSerializer):
     categories = CategorySerializer(many=True, read_only=True)
-    sizes = SizeSerializer(many=True, read_only=True)
+    sizes = ProductSizeSerializer(
+        many=True, read_only=True, source="productsize_set"
+    )
     images = ProductImageSerializer(
         many=True, source="productimage_set", read_only=True
     )
