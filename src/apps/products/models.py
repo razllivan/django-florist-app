@@ -37,6 +37,7 @@ class Size(models.Model):
 
 class Image(models.Model):
     img = models.ImageField(upload_to="images/")
+    size_description = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return os.path.basename(self.img.name)
@@ -44,7 +45,6 @@ class Image(models.Model):
 
 class Product(CatalogItemBase):
     description = models.TextField(blank=True)
-    size_description = models.CharField(max_length=100, blank=True)
     is_archived = models.BooleanField(default=False, db_index=True)
     categories = models.ManyToManyField(Category, blank=True)
     sizes = models.ManyToManyField(Size, through="ProductSize", blank=True)
