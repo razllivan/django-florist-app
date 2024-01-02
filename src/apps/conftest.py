@@ -36,6 +36,29 @@ def product(db):
 
 
 @pytest.fixture
+def product_serializer_write_data(db, image_no_save_file) -> dict:
+    """
+    Provides a dictionary of data for creating or updating a Product instance
+    via the ProductSerializer.
+    Includes fields necessary for writing:
+    categories_ids, sizes_ids, and images_ids.
+
+    Use this fixture when testing the ProductSerializer
+    with write operations.
+    """
+    product = ProductFactory.build()
+    categories = CategoryFactory.create_batch(2)
+    images = image_no_save_file.create_batch(3)
+
+    return {
+        "name": product.name,
+        "description": product.description,
+        "categories_ids": [category.id for category in categories],
+        "images_ids": [image.id for image in images],
+    }
+
+
+@pytest.fixture
 def image(db):
     return ImageFactory()
 
