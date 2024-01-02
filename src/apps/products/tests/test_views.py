@@ -4,7 +4,8 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from apps.products.models import ProductImage
+from apps.products.models import Product, ProductImage
+from apps.products.tests.factories import ProductFactory
 
 
 @pytest.mark.django_db
@@ -144,3 +145,54 @@ class TestProductImagesViewSet:
         data = {"new_image": "invalid_image_file"}
         response = api_client.patch(url, data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+@pytest.mark.django_db
+class TestProductViewSet:
+    def test_create_product(self, api_client, product_serializer_write_data):
+        url = reverse("products:product-list")
+        response = api_client.post(url, product_serializer_write_data)
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["name"] == product_serializer_write_data["name"]
+        assert Product.objects.filter(pk=response.data["id"]).exists()
+        product = Product.objects.get(pk=response.data["id"])
+        assert product.name == product_serializer_write_data["name"]
+        assert product.images.count() == len(
+            product_serializer_write_data["images_ids"]
+        )
+
+    def test_list_products(self, api_client):
+        ProductFactory.create_batch(5)
+        url = reverse("products:product-list")
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert Product.objects.all().count() == len(response.data)
+
+    def test_retrieve_product(self, api_client, product):
+        url = reverse("products:product-detail", kwargs={"pk": product.id})
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["id"] == product.id
+
+    def test_update_product(
+        self, api_client, product, product_serializer_write_data
+    ):
+        url = reverse("products:product-detail", kwargs={"pk": product.id})
+        response = api_client.put(url, product_serializer_write_data)
+        product.refresh_from_db()
+        assert response.status_code == status.HTTP_200_OK
+        assert product.name == product_serializer_write_data["name"]
+
+    def test_partial_update_product(self, api_client, product):
+        url = reverse("products:product-detail", kwargs={"pk": product.id})
+        partial_update_data = {"name": "New product name"}
+        response = api_client.patch(url, partial_update_data)
+        product.refresh_from_db()
+        assert response.status_code == status.HTTP_200_OK
+        assert product.name == partial_update_data["name"]
+
+    def test_destroy_product(self, api_client, product):
+        url = reverse("products:product-detail", kwargs={"pk": product.id})
+        response = api_client.delete(url)
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not Product.objects.filter(pk=product.id).exists()
