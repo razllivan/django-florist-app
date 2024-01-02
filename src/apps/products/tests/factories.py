@@ -2,7 +2,14 @@ import factory
 from factory import Faker, Sequence, SubFactory
 from factory.django import DjangoModelFactory, ImageField
 
-from apps.products.models import Category, Image, Product, ProductImage
+from apps.products.models import (
+    Category,
+    Image,
+    Product,
+    ProductImage,
+    ProductSize,
+    Size,
+)
 
 
 class CategoryFactory(DjangoModelFactory):
@@ -41,3 +48,19 @@ class ProductImageFactory(DjangoModelFactory):
 
     product = SubFactory(ProductFactory)
     image = SubFactory(ImageFactory)
+
+
+class SizeFactory(DjangoModelFactory):
+    name = Faker("word")
+
+    class Meta:
+        model = Size
+
+
+class ProductSizeFactory(DjangoModelFactory):
+    product = SubFactory(ProductFactory)
+    size = SubFactory(SizeFactory)
+    price = Faker("random_int", min=10)
+
+    class Meta:
+        model = ProductSize
