@@ -112,12 +112,14 @@ class ProductSerializer(ModelSerializer):
         required=False,
         queryset=Category.objects.all(),
         write_only=True,
+        source="categories",
     )
     images_ids = PrimaryKeyRelatedField(
         many=True,
         required=False,
         queryset=Image.objects.all(),
         write_only=True,
+        source="images",
     )
 
     class Meta:
