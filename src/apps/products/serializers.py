@@ -113,9 +113,6 @@ class ProductSerializer(ModelSerializer):
         queryset=Category.objects.all(),
         write_only=True,
     )
-    sizes_ids = PrimaryKeyRelatedField(
-        many=True, required=False, queryset=Size.objects.all(), write_only=True
-    )
     images_ids = PrimaryKeyRelatedField(
         many=True,
         required=False,
