@@ -23,6 +23,7 @@ class ProductFactory(DjangoModelFactory):
     class Meta:
         model = Product
 
+    name = Faker("word")
     description = Faker("text")
 
     @factory.post_generation
