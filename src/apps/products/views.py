@@ -13,6 +13,7 @@ from apps.products.serializers import (
     ProductSerializer,
     SizeSerializer,
 )
+from common.views import MultipleFieldLookupMixin
 
 
 class CategoryViewSet(ModelViewSet):
@@ -56,10 +57,12 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
 
-class ProductImagesViewSet(ModelViewSet):
+class ProductImagesViewSet(MultipleFieldLookupMixin, ModelViewSet):
     serializer_class = ProductImageSerializer
     parser_classes = (MultiPartParser, FormParser)
     http_method_names = ["get", "post", "patch", "delete"]
+    lookup_field = "image_id"
+    lookup_fields = ["product_id", "image_id"]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
@@ -69,20 +72,12 @@ class ProductImagesViewSet(ModelViewSet):
         return ProductImage.objects.filter(product_id=product_id)
 
     def retrieve(self, request, *args, **kwargs):
-        image_id = kwargs.get("pk")
-        product_id = self.kwargs.get("product_id")
-        image = get_object_or_404(
-            ProductImage, image_id=image_id, product_id=product_id
-        )
+        image = self.get_object()
         serializer = self.get_serializer(image)
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
-        image_id = kwargs.get("pk")
-        product_id = self.kwargs.get("product_id")
-        image = get_object_or_404(
-            ProductImage, image_id=image_id, product_id=product_id
-        )
+        image = self.get_object()
         serializer = self.get_serializer(
             image, data=request.data, partial=True
         )
@@ -104,10 +99,6 @@ class ProductImagesViewSet(ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        image_id = kwargs.get("pk")
-        product_id = self.kwargs.get("product_id")
-        image = get_object_or_404(
-            ProductImage, image_id=image_id, product_id=product_id
-        )
+        image = self.get_object()
         image.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
