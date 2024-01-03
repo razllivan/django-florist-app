@@ -10,140 +10,114 @@ from apps.products.tests.factories import ProductFactory
 
 @pytest.mark.django_db
 class TestProductImagesViewSet:
-    def test_list_product_images(
-        self, api_client, product, product_image_no_save_file
-    ):
+    @pytest.fixture(autouse=True)
+    def setup_product_images(self, product, image_no_save_file):
+        self.product = product
+        self.images = image_no_save_file.create_batch(4)
+        self.product.images.add(*self.images)
+        self.target_image = self.images[2]
+        self.url_list = reverse(
+            "products:productimages-list",
+            kwargs={"product_id": self.product.id},
+        )
+        self.url_detail = reverse(
+            "products:productimages-detail",
+            kwargs={
+                "product_id": self.product.id,
+                "image_id": self.target_image.id,
+            },
+        )
+
+    def test_list_product_images(self, api_client):
         """
         Test that the API endpoint for listing product images returns the
         correct status code and the correct number of images.
         """
-        url = reverse(
-            "products:productimages-list", kwargs={"product_id": product.id}
-        )
-        response = api_client.get(url)
+        response = api_client.get(self.url_list)
         assert response.status_code == status.HTTP_200_OK
-        assert (
-            len(response.data)
-            == ProductImage.objects.filter(product=product).count()
-        )
+        assert len(response.data) == self.product.images.count()
 
-    def test_create_product_image(
-        self, api_client, product, image_no_save_file
-    ):
+    def test_create_product_image(self, api_client, image_no_save_file):
         """
         Test that the API endpoint for creating a product image returns the
         correct status code and that the image is successfully created.
         """
-        url = reverse(
-            "products:productimages-list", kwargs={"product_id": product.id}
-        )
         image_file = image_no_save_file.build().img
         data = {"new_image": image_file}
-        response = api_client.post(url, data)
+        response = api_client.post(self.url_list, data)
 
+        db_image_filename = os.path.basename(
+            self.product.images.get(pk=response.data["image"]["id"]).img.name
+        )
+        uploaded_image_filename = data["new_image"].name
         assert response.status_code == status.HTTP_201_CREATED
-        assert ProductImage.objects.filter(product=product).exists()
+        assert db_image_filename == uploaded_image_filename
 
     def test_retrieve_product_image(
-        self, api_client, product_image_no_save_file
+        self, api_client, product_image_no_save_file, image_no_save_file
     ):
         """
         Test that the API endpoint for retrieving a product image returns the
         correct status code and the correct image.
         """
-        url = reverse(
-            "products:productimages-detail",
-            kwargs={
-                "product_id": product_image_no_save_file.product.id,
-                "pk": product_image_no_save_file.image.id,
-            },
-        )
-        response = api_client.get(url)
+        response = api_client.get(self.url_detail)
         assert response.status_code == status.HTTP_200_OK
-        assert (
-            response.data["image"]["id"] == product_image_no_save_file.image.id
-        )
+        assert response.data["image"]["id"] == self.target_image.id
 
     def test_partial_update_product_image(
-        self, api_client, product_image_no_save_file, image_no_save_file
+        self, api_client, image_no_save_file
     ):
         """
         Test that the API endpoint for partially updating a product image
         returns the correct status code and updates the image correctly.
         """
-        url = reverse(
-            "products:productimages-detail",
-            kwargs={
-                "product_id": product_image_no_save_file.product.id,
-                "pk": product_image_no_save_file.image.id,
-            },
-        )
         image_file = image_no_save_file.build().img
         data = {"new_image": image_file}
-        response = api_client.patch(url, data)
-        product_image_no_save_file.refresh_from_db()
+        response = api_client.patch(self.url_detail, data)
         db_image_filename = os.path.basename(
-            product_image_no_save_file.image.img.name
+            self.product.images.get(pk=response.data["image"]["id"]).img.name
         )
         uploaded_image_filename = data["new_image"].name
         assert response.status_code == status.HTTP_200_OK
         assert db_image_filename == uploaded_image_filename
 
-    def test_destroy_product_image(
-        self, api_client, product_image_no_save_file
-    ):
+    def test_destroy_product_image(self, api_client, image_no_save_file):
         """
         Test that the API endpoint for deleting a product image returns the
         correct status code and deletes the image successfully.
         """
-        url = reverse(
-            "products:productimages-detail",
-            kwargs={
-                "product_id": product_image_no_save_file.product.id,
-                "pk": product_image_no_save_file.image.id,
-            },
-        )
-        response = api_client.delete(url)
+        initial_image_count = self.product.images.count()
+        response = api_client.delete(self.url_detail)
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not ProductImage.objects.filter(
-            id=product_image_no_save_file.id
-        ).exists()
+        assert not self.product.images.filter(pk=self.target_image.id)
+        final_image_count = self.product.images.count()
+        assert final_image_count == initial_image_count - 1
 
-    def test_update_preview_status(
-        self, api_client, product_image_no_save_file
-    ):
+    @pytest.mark.parametrize("is_preview", [True, False])
+    def test_update_preview_status(self, api_client, is_preview):
         """
         Test that the API endpoint for updating the preview status of a product
         image returns the correct status code
         and updates the preview status correctly.
         """
-        url = reverse(
-            "products:productimages-detail",
-            kwargs={
-                "product_id": product_image_no_save_file.product.id,
-                "pk": product_image_no_save_file.image.id,
-            },
-        )
-        data = {"is_preview": True}
-        response = api_client.patch(url, data)
-        product_image_no_save_file.refresh_from_db()
+        data = {"is_preview": is_preview}
+        response = api_client.patch(self.url_detail, data)
         assert response.status_code == status.HTTP_200_OK
-        assert product_image_no_save_file.is_preview is True
+        assert (
+            ProductImage.objects.get(
+                product=self.product, image=self.target_image
+            ).is_preview
+            is is_preview
+        )
 
     def test_invalid_image_file(self, api_client, product_image_no_save_file):
         """
         Test that the API endpoint returns the correct status code
         when an invalid image file is provided.
         """
-        url = reverse(
-            "products:productimages-detail",
-            kwargs={
-                "product_id": product_image_no_save_file.product.id,
-                "pk": product_image_no_save_file.image.id,
-            },
-        )
+
         data = {"new_image": "invalid_image_file"}
-        response = api_client.patch(url, data)
+        response = api_client.patch(self.url_detail, data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
