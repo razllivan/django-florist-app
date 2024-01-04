@@ -11,11 +11,10 @@ from apps.products.tests.factories import ProductFactory
 @pytest.mark.django_db
 class TestProductImagesViewSet:
     @pytest.fixture(autouse=True)
-    def setup_product_images(self, product, image_no_save_file):
-        self.product = product
-        self.images = image_no_save_file.create_batch(4)
-        self.product.images.add(*self.images)
-        self.target_image = self.images[2]
+    def setup_product_images(self, products_with_images):
+        self.products = products_with_images
+        self.product = self.products[5]
+        self.target_image = self.product.images.all()[2]
         self.url_list = reverse(
             "products:productimages-list",
             kwargs={"product_id": self.product.id},
