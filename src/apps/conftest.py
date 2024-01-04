@@ -45,6 +45,11 @@ def products_with_images(db, image_no_save_file):
 
 
 @pytest.fixture
+def products_without_images(db, image_no_save_file):
+    return ProductFactory.create_batch(10)
+
+
+@pytest.fixture
 def product_serializer_write_data(db, image_no_save_file) -> dict:
     """
     Provides a dictionary of data for creating or updating a Product instance
