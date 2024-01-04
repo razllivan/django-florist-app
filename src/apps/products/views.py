@@ -13,7 +13,6 @@ from apps.products.serializers import (
     ProductSerializer,
     SizeSerializer,
 )
-from common.views import MultipleFieldLookupMixin
 
 
 class CategoryViewSet(ModelViewSet):
@@ -57,12 +56,11 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
 
-class ProductImagesViewSet(MultipleFieldLookupMixin, ModelViewSet):
+class ProductImagesViewSet(ModelViewSet):
     serializer_class = ProductImageSerializer
     parser_classes = (MultiPartParser, FormParser)
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "image_id"
-    lookup_fields = ["product_id", "image_id"]
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
