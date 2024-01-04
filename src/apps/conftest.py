@@ -36,6 +36,15 @@ def product(db):
 
 
 @pytest.fixture
+def products_with_images(db, image_no_save_file):
+    products = ProductFactory.create_batch(10)
+    for product in products:
+        images = image_no_save_file.create_batch(4)
+        product.images.add(*images)
+    return products
+
+
+@pytest.fixture
 def product_serializer_write_data(db, image_no_save_file) -> dict:
     """
     Provides a dictionary of data for creating or updating a Product instance
