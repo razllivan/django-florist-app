@@ -60,7 +60,7 @@ class SizeFactory(DjangoModelFactory):
 class ProductSizeFactory(DjangoModelFactory):
     product = SubFactory(ProductFactory)
     size = SubFactory(SizeFactory)
-    price = Faker("random_int", min=10)
+    price = Faker("random_int", min=10, max=50000)
 
     class Meta:
         model = ProductSize
