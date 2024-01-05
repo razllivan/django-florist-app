@@ -1,4 +1,5 @@
 import os.path
+from abc import ABC, abstractmethod
 
 import pytest
 from django.urls import reverse
@@ -8,40 +9,59 @@ from apps.products.models import Product, ProductImage
 from apps.products.tests.factories import ProductFactory
 
 
-@pytest.mark.django_db
-class TestProductImagesViewSet:
+class ProductRelatedViewSetTestBase(ABC):
     NON_EXISTENT_ID = 9999
 
     @pytest.fixture(autouse=True)
-    def setup_product_images(self, products_with_images):
-        self.products = products_with_images
+    def setup_product(self, products_with_associations):
+        self.products = products_with_associations
         self.product = self.products[5]
-        self.target_image = self.product.images.all()[2]
+        self.target_item = self.get_target_item(self.product)
         self.url_list = self.build_url(product_id=self.product.id)
         self.url_detail = self.build_url(
-            product_id=self.product.id, image_id=self.target_image.id
+            product_id=self.product.id, item_id=self.target_item.id
         )
         self.url_list_not_found = self.build_url(
             product_id=self.NON_EXISTENT_ID
         )
-        self.url_detail_not_found_image = self.build_url(
-            product_id=self.product.id, image_id=self.NON_EXISTENT_ID
+        self.url_detail_not_found_item = self.build_url(
+            product_id=self.product.id, item_id=self.NON_EXISTENT_ID
         )
         self.url_detail_not_found_product = self.build_url(
-            product_id=self.NON_EXISTENT_ID, image_id=self.target_image.id
+            product_id=self.NON_EXISTENT_ID, item_id=self.target_item.id
         )
 
-    def build_url(self, product_id, image_id=None):
-        if image_id:
-            return reverse(
-                "products:productimages-detail",
-                kwargs={"product_id": product_id, "image_id": image_id},
-            )
-        else:
-            return reverse(
-                "products:productimages-list",
-                kwargs={"product_id": product_id},
-            )
+    @abstractmethod
+    def get_target_item(self, product):
+        pass
+
+    def build_url(self, product_id, item_id=None):
+        base_name = self.get_url_name()
+        detail_or_list = "detail" if item_id else "list"
+        kwargs = {"product_id": product_id}
+        if item_id:
+            kwargs[self.get_item_id_name()] = item_id
+        return reverse(f"products:{base_name}-{detail_or_list}", kwargs=kwargs)
+
+    @abstractmethod
+    def get_url_name(self):
+        pass
+
+    @abstractmethod
+    def get_item_id_name(self):
+        pass
+
+
+@pytest.mark.django_db
+class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
+    def get_target_item(self, product):
+        return product.images.all()[2]
+
+    def get_url_name(self):
+        return "productimages"
+
+    def get_item_id_name(self):
+        return "image_id"
 
     def test_list_product_images(self, api_client):
         """
@@ -64,20 +84,15 @@ class TestProductImagesViewSet:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_list_product_images_empty(
-        self, api_client, products_without_images
+        self, api_client, products_without_associations
     ):
         """
         Test that the API endpoint for listing product images returns an empty
         list when the product has no images.
         """
-        product = products_without_images[5]
+        product = products_without_associations[5]
 
-        url_list_empty = reverse(
-            "products:productimages-list",
-            kwargs={"product_id": product.id},
-        )
-
-        response = api_client.get(url_list_empty)
+        response = api_client.get(self.build_url(product_id=product.id))
 
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
@@ -111,16 +126,14 @@ class TestProductImagesViewSet:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_retrieve_product_image(
-        self, api_client, product_image_no_save_file, image_no_save_file
-    ):
+    def test_retrieve_product_image(self, api_client):
         """
         Test that the API endpoint for retrieving a product image returns the
         correct status code and the correct image.
         """
         response = api_client.get(self.url_detail)
         assert response.status_code == status.HTTP_200_OK
-        assert response.data["image"]["id"] == self.target_image.id
+        assert response.data["image"]["id"] == self.target_item.id
 
     def test_retrieve_product_image_not_found(self, api_client):
         """
@@ -128,7 +141,7 @@ class TestProductImagesViewSet:
         status code when the image ID or product ID does not exist.
         """
 
-        response = api_client.get(self.url_detail_not_found_image)
+        response = api_client.get(self.url_detail_not_found_item)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
         response = api_client.get(self.url_detail_not_found_product)
@@ -162,7 +175,7 @@ class TestProductImagesViewSet:
         image_file = image_no_save_file.build().img
         data = {"new_image": image_file}
 
-        response = api_client.patch(self.url_detail_not_found_image, data)
+        response = api_client.patch(self.url_detail_not_found_item, data)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
         response = api_client.patch(self.url_detail_not_found_product, data)
@@ -176,7 +189,7 @@ class TestProductImagesViewSet:
         initial_image_count = self.product.images.count()
         response = api_client.delete(self.url_detail)
         assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not self.product.images.filter(pk=self.target_image.id)
+        assert not self.product.images.filter(pk=self.target_item.id)
         final_image_count = self.product.images.count()
         assert final_image_count == initial_image_count - 1
 
@@ -186,7 +199,7 @@ class TestProductImagesViewSet:
         status code when the image ID or product ID does not exist.
         """
 
-        response = api_client.delete(self.url_detail_not_found_image)
+        response = api_client.delete(self.url_detail_not_found_item)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
         response = api_client.delete(self.url_detail_not_found_product)
@@ -204,12 +217,12 @@ class TestProductImagesViewSet:
         assert response.status_code == status.HTTP_200_OK
         assert (
             ProductImage.objects.get(
-                product=self.product, image=self.target_image
+                product=self.product, image=self.target_item
             ).is_preview
             is is_preview
         )
 
-    def test_invalid_image_file(self, api_client, product_image_no_save_file):
+    def test_invalid_image_file(self, api_client):
         """
         Test that the API endpoint returns the correct status code
         when an invalid image file is provided.
