@@ -6,6 +6,7 @@ from apps.products.tests.factories import (
     ImageFactory,
     ProductFactory,
     ProductImageFactory,
+    ProductSizeFactory,
 )
 
 
@@ -36,17 +37,23 @@ def product(db):
 
 
 @pytest.fixture
-def products_with_images(db, image_no_save_file):
+def products_without_associations(db, image_no_save_file):
+    return ProductFactory.create_batch(10)
+
+
+@pytest.fixture
+def products_with_associations(db, image_no_save_file):
     products = ProductFactory.create_batch(10)
     for product in products:
         images = image_no_save_file.create_batch(4)
         product.images.add(*images)
+
+        categories = CategoryFactory.create_batch(4)
+        product.categories.add(*categories)
+
+        ProductSizeFactory.create_batch(4, product=product)
+
     return products
-
-
-@pytest.fixture
-def products_without_images(db, image_no_save_file):
-    return ProductFactory.create_batch(10)
 
 
 @pytest.fixture
