@@ -63,7 +63,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
     def get_item_id_name(self):
         return "image_id"
 
-    def test_list_product_images(self, api_client):
+    def test_list(self, api_client):
         """
         Test that the API endpoint for listing product images returns the
         correct status code and the correct number of images.
@@ -72,9 +72,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data) == self.product.images.count()
 
-    def test_list_endpoint_returns_404_when_product_not_found(
-        self, api_client
-    ):
+    def test_list_returns_404_when_product_not_found(self, api_client):
         """
         Test that the API endpoint for listing product images returns a 404
         status code when the product ID does not exist.
@@ -83,7 +81,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         response = api_client.get(self.url_list_not_found)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_list_product_images_empty(
+    def test_list_returns_empty(
         self, api_client, products_without_associations
     ):
         """
@@ -97,7 +95,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
-    def test_create_product_image(self, api_client, image_no_save_file):
+    def test_create(self, api_client, image_no_save_file):
         """
         Test that the API endpoint for creating a product image returns the
         correct status code and that the image is successfully created.
@@ -113,7 +111,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_201_CREATED
         assert db_image_filename == uploaded_image_filename
 
-    def test_create_product_image_not_found(
+    def test_create_returns_404_when_product_not_found(
         self, api_client, image_no_save_file
     ):
         """
@@ -126,7 +124,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_retrieve_product_image(self, api_client):
+    def test_retrieve(self, api_client):
         """
         Test that the API endpoint for retrieving a product image returns the
         correct status code and the correct image.
@@ -135,21 +133,18 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data["image"]["id"] == self.target_item.id
 
-    def test_retrieve_product_image_not_found(self, api_client):
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_retrieve_returns_404_when_param_not_found(self, api_client, url):
         """
         Test that the API endpoint for retrieving a product image returns a 404
         status code when the image ID or product ID does not exist.
         """
-
-        response = api_client.get(self.url_detail_not_found_item)
+        response = api_client.get(getattr(self, url))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-        response = api_client.get(self.url_detail_not_found_product)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    def test_partial_update_product_image(
-        self, api_client, image_no_save_file
-    ):
+    def test_partial_update(self, api_client, image_no_save_file):
         """
         Test that the API endpoint for partially updating a product image
         returns the correct status code and updates the image correctly.
@@ -164,7 +159,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert db_image_filename == uploaded_image_filename
 
-    def test_partial_update_product_image_not_found(
+    def test_partial_update_returns_404_when_product_not_found(
         self, api_client, image_no_save_file
     ):
         """
@@ -181,10 +176,11 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         response = api_client.patch(self.url_detail_not_found_product, data)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_destroy_product_image(self, api_client, image_no_save_file):
+    def test_destroy(self, api_client, image_no_save_file):
         """
         Test that the API endpoint for deleting a product image returns the
-        correct status code and deletes the image successfully.
+        correct status code and successfully removes the association
+        between the image and the product.
         """
         initial_image_count = self.product.images.count()
         response = api_client.delete(self.url_detail)
@@ -193,7 +189,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         final_image_count = self.product.images.count()
         assert final_image_count == initial_image_count - 1
 
-    def test_destroy_product_image_not_found(self, api_client):
+    def test_destroy_returns_404_when_product_not_found(self, api_client):
         """
         Test that the API endpoint for deleting a product image returns a 404
         status code when the image ID or product ID does not exist.
