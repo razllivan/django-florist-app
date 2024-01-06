@@ -54,18 +54,22 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
 
-class ProductImagesViewSet(ModelViewSet):
-    serializer_class = ProductImageSerializer
-    parser_classes = (MultiPartParser, FormParser)
-    http_method_names = ["get", "post", "patch", "delete"]
-    lookup_field = "image_id"
+class BaseProductRelatedViewSet(ModelViewSet):
+    model = None
+
+    def __init__(self, *args, **kwargs):
+        if not self.model:
+            raise AttributeError(
+                "Subclasses must specify the 'model' attribute"
+            )
+        super().__init__(*args, **kwargs)
 
     def get_queryset(self):
         if getattr(self, "swagger_fake_view", False):
             # Return a fake queryset for schema generation
-            return ProductImage.objects.none()
+            return self.model.objects.none()
         product_id = self.kwargs["product_id"]
-        return ProductImage.objects.filter(product_id=product_id)
+        return self.model.objects.filter(product_id=product_id)
 
     def perform_create(self, serializer):
         product_id = self.kwargs.get("product_id")
@@ -79,7 +83,10 @@ class ProductImagesViewSet(ModelViewSet):
             get_object_or_404(Product, pk=product_id)
         return super().list(request, *args, **kwargs)
 
-    def destroy(self, request, *args, **kwargs):
-        image = self.get_object()
-        image.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ProductImagesViewSet(BaseProductRelatedViewSet):
+    model = ProductImage
+    serializer_class = ProductImageSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    http_method_names = ["get", "post", "patch", "delete"]
+    lookup_field = "image_id"
