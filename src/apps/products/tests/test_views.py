@@ -5,7 +5,13 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from apps.products.models import Product, ProductImage
+from apps.products.models import (
+    Product,
+    ProductImage,
+    ProductSize,
+    Size,
+    Image,
+)
 from apps.products.tests.factories import ProductFactory
 
 
@@ -159,8 +165,11 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert db_image_filename == uploaded_image_filename
 
-    def test_partial_update_returns_404_when_product_not_found(
-        self, api_client, image_no_save_file
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_partial_update_returns_404_when_param_not_found(
+        self, api_client, image_no_save_file, url
     ):
         """
         Test that the API endpoint for partially updating
@@ -170,10 +179,7 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         image_file = image_no_save_file.build().img
         data = {"new_image": image_file}
 
-        response = api_client.patch(self.url_detail_not_found_item, data)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-        response = api_client.patch(self.url_detail_not_found_product, data)
+        response = api_client.patch(getattr(self, url), data)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_destroy(self, api_client, image_no_save_file):
@@ -189,16 +195,16 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         final_image_count = self.product.images.count()
         assert final_image_count == initial_image_count - 1
 
-    def test_destroy_returns_404_when_product_not_found(self, api_client):
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_destroy_returns_404_when_param_not_found(self, api_client, url):
         """
         Test that the API endpoint for deleting a product image returns a 404
         status code when the image ID or product ID does not exist.
         """
 
-        response = api_client.delete(self.url_detail_not_found_item)
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
-        response = api_client.delete(self.url_detail_not_found_product)
+        response = api_client.delete(getattr(self, url))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.parametrize("is_preview", [True, False])
