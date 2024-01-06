@@ -5,13 +5,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from apps.products.models import (
-    Image,
-    Product,
-    ProductImage,
-    ProductSize,
-    Size,
-)
+from apps.products.models import Image, Product, ProductImage, Size
 from apps.products.tests.factories import ProductFactory
 
 
@@ -298,3 +292,187 @@ class TestProductViewSet:
         response = api_client.delete(url)
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Product.objects.filter(pk=product.id).exists()
+
+
+class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
+    def get_item_id_name(self):
+        return "size_id"
+
+    def get_target_item(self, product):
+        return product.sizes.all()[2]
+
+    def get_url_name(self):
+        return "productsizes"
+
+    def test_list(self, api_client):
+        """
+        Test that the API endpoint for listing product sizes returns the
+        correct status code and the correct number of sizes.
+        """
+        response = api_client.get(self.url_list)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == self.product.sizes.count()
+
+    def test_list_returns_404_when_product_not_found(self, api_client):
+        """
+        Test that the API endpoint for listing product sizes returns a 404
+        status code when the product ID does not exist.
+        """
+
+        response = api_client.get(self.url_list_not_found)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_list_returns_empty(
+        self, api_client, products_without_associations
+    ):
+        """
+        Test that the API endpoint for listing product sizes returns an empty
+        list when the product has no sizes.
+        """
+        product = products_without_associations[5]
+
+        response = api_client.get(self.build_url(product_id=product.id))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []
+
+    def test_create(self, api_client, product_size_serializer_write_data):
+        """
+        Test that the API endpoint for creating a product size returns the
+        correct status code and that the size is successfully created.
+        """
+        initial_sizes_association_count = self.product.sizes.count()
+        response = api_client.post(
+            self.url_list, product_size_serializer_write_data, format="json"
+        )
+        final_sizes_association_count = self.product.sizes.count()
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert (
+            response.data["size"]["name"]
+            == product_size_serializer_write_data["size"]["name"]
+        )
+        assert (
+            final_sizes_association_count
+            == initial_sizes_association_count + 1
+        )
+
+    def test_create_returns_404_when_product_not_found(
+        self, api_client, product_size_serializer_write_data
+    ):
+        """
+        Test that the API endpoint for creating a product size returns the
+        returns a 404 status code when the product ID does not exist.
+        """
+        response = api_client.post(
+            self.url_list_not_found,
+            product_size_serializer_write_data,
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_retrieve(self, api_client):
+        """
+        Test that the API endpoint for retrieving a product size returns the
+        correct status code and the correct size.
+        """
+        response = api_client.get(self.url_detail)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["size"]["id"] == self.target_item.id
+
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_retrieve_returns_404_when_param_not_found(self, api_client, url):
+        """
+        Test that the API endpoint for retrieving a product image returns a 404
+        status code when the size ID or product ID does not exist.
+        """
+        response = api_client.get(getattr(self, url))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_partial_update(
+        self, api_client, product_size_serializer_write_data
+    ):
+        """
+        Test that the API endpoint for partially updating a product size
+        returns the correct status code and updates the size correctly.
+        """
+        initial_size_count = Size.objects.count()
+        data = {
+            "size": {
+                "name": product_size_serializer_write_data["size"]["name"]
+            },
+            "price": product_size_serializer_write_data["price"],
+        }
+        response = api_client.patch(self.url_detail, data, format="json")
+        final_sizes_count = Size.objects.count()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert (
+            product_size_serializer_write_data["size"]["name"]
+            == response.data["size"]["name"]
+        )
+        assert (
+            product_size_serializer_write_data["price"]
+            == response.data["price"]
+        )
+        assert final_sizes_count == initial_size_count + 1
+
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_partial_update_returns_404_when_param_not_found(
+        self, api_client, url, product_size_serializer_write_data
+    ):
+        """
+        Test that the API endpoint for partially updating
+        a product size returns a 404 status code when the size ID
+        or product ID does not exist.
+        """
+        data = {
+            "size": {
+                "name": product_size_serializer_write_data["size"]["name"]
+            },
+            "price": product_size_serializer_write_data["price"],
+        }
+
+        response = api_client.patch(getattr(self, url), data, format="json")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_destroy(self, api_client):
+        """
+        Test the deletion of a product size via the API endpoint.
+
+        This test verifies that when a product size is deleted,
+        the API returns the correct status code
+        and successfully removes the association between the size
+        and the product.
+        The test also ensures that the size itself is not deleted
+        """
+        initial_sizes_association_count = self.product.sizes.count()
+        initial_sizes_count = Size.objects.count()
+        response = api_client.delete(self.url_detail)
+        final_images_association_count = self.product.sizes.count()
+        final_images_count = Size.objects.count()
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not self.product.images.filter(pk=self.target_item.id)
+        assert (
+            final_images_association_count
+            == initial_sizes_association_count - 1
+        )
+        assert final_images_count == initial_sizes_count
+
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_destroy_returns_404_when_param_not_found(self, api_client, url):
+        """
+        Test that the API endpoint for deleting a product image returns a 404
+        status code when the size ID or product ID does not exist.
+        """
+
+        response = api_client.delete(getattr(self, url))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
