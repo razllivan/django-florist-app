@@ -6,11 +6,11 @@ from django.urls import reverse
 from rest_framework import status
 
 from apps.products.models import (
+    Image,
     Product,
     ProductImage,
     ProductSize,
     Size,
-    Image,
 )
 from apps.products.tests.factories import ProductFactory
 
@@ -188,16 +188,26 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
 
     def test_destroy(self, api_client, image_no_save_file):
         """
-        Test that the API endpoint for deleting a product image returns the
-        correct status code and successfully removes the association
-        between the image and the product.
+        Test the deletion of a product image via the API endpoint.
+
+        This test verifies that when a product image is deleted,
+        the API returns the correct status code
+        and successfully removes the association between the image
+        and the product.
+        The test also ensures that the image itself is not deleted
         """
-        initial_image_count = self.product.images.count()
+        initial_images_count = Image.objects.count()
+        initial_images_association_count = self.product.images.count()
         response = api_client.delete(self.url_detail)
+        final_images_count = Image.objects.count()
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not self.product.images.filter(pk=self.target_item.id)
-        final_image_count = self.product.images.count()
-        assert final_image_count == initial_image_count - 1
+        final_images_association_count = self.product.images.count()
+        assert (
+            final_images_association_count
+            == initial_images_association_count - 1
+        )
+        assert final_images_count == initial_images_count
 
     @pytest.mark.parametrize(
         "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
