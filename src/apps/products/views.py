@@ -1,14 +1,22 @@
 from rest_framework.generics import get_object_or_404
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
-from apps.products.models import Category, Image, Product, ProductImage, Size
+from apps.products.models import (
+    Category,
+    Image,
+    Product,
+    ProductImage,
+    ProductSize,
+    Size,
+)
 from apps.products.serializers import (
     CategorySerializer,
     ImageSerializer,
     ProductImageSerializer,
     ProductSerializer,
+    ProductSizeSerializer,
     SizeSerializer,
 )
 
@@ -90,3 +98,10 @@ class ProductImagesViewSet(BaseProductRelatedViewSet):
     parser_classes = (MultiPartParser, FormParser)
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "image_id"
+
+
+class ProductSizesViewSet(BaseProductRelatedViewSet):
+    model = ProductSize
+    serializer_class = ProductSizeSerializer
+    lookup_field = "size_id"
+    parser_classes = (JSONParser,)
