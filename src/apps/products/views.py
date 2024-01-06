@@ -103,5 +103,6 @@ class ProductImagesViewSet(BaseProductRelatedViewSet):
 class ProductSizesViewSet(BaseProductRelatedViewSet):
     model = ProductSize
     serializer_class = ProductSizeSerializer
+    http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
     parser_classes = (JSONParser,)
