@@ -4,18 +4,12 @@ from autoslug import AutoSlugField
 from django.db import models
 
 
-class CatalogItemBase(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=200)
     slug = AutoSlugField(
         populate_from="name", unique=True, db_index=True, always_update=True
     )
     is_active = models.BooleanField(default=True, db_index=True)
-
-    class Meta:
-        abstract = True
-
-
-class Category(CatalogItemBase):
     parent_category = models.ForeignKey(
         "self",
         on_delete=models.CASCADE,
@@ -43,7 +37,12 @@ class Image(models.Model):
         return os.path.basename(self.img.name)
 
 
-class Product(CatalogItemBase):
+class Product(models.Model):
+    name = models.CharField(max_length=200)
+    slug = AutoSlugField(
+        populate_from="name", unique=True, db_index=True, always_update=True
+    )
+    is_active = models.BooleanField(default=True, db_index=True)
     description = models.TextField(blank=True)
     is_archived = models.BooleanField(default=False, db_index=True)
     categories = models.ManyToManyField(Category, blank=True)
