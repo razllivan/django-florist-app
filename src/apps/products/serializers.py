@@ -30,7 +30,7 @@ class SizeSerializer(ModelSerializer):
 
 
 class ProductSizeSerializer(ModelSerializer):
-    size = SizeSerializer(read_only=True)
+    size = SizeSerializer()
 
     class Meta:
         model = ProductSize
@@ -39,6 +39,20 @@ class ProductSizeSerializer(ModelSerializer):
             "price",
             "is_active",
         ]
+
+    def create(self, validated_data):
+        size_data = validated_data.pop("size")
+        size_instance = Size.objects.create(**size_data)
+        validated_data["size"] = size_instance
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # sourcery skip: use-named-expression
+        size_data = validated_data.pop("size", None)
+        if size_data:
+            size_instance = Size.objects.create(**size_data)
+            instance.size = size_instance
+        return super().update(instance, validated_data)
 
 
 class ImageSerializer(ModelSerializer):
