@@ -155,15 +155,19 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         Test that the API endpoint for partially updating a product image
         returns the correct status code and updates the image correctly.
         """
+        initial_images_count = Image.objects.count()
         image_file = image_no_save_file.build().img
         data = {"new_image": image_file}
         response = api_client.patch(self.url_detail, data)
+        final_images_count = Image.objects.count()
+
         db_image_filename = os.path.basename(
             self.product.images.get(pk=response.data["image"]["id"]).img.name
         )
         uploaded_image_filename = data["new_image"].name
         assert response.status_code == status.HTTP_200_OK
         assert db_image_filename == uploaded_image_filename
+        assert final_images_count == initial_images_count + 1
 
     @pytest.mark.parametrize(
         "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
