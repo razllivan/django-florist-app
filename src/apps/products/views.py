@@ -21,7 +21,10 @@ from apps.products.serializers import (
     LinkProductSizeSerializer,
 )
 from apps.products.mixins import (
+    ListProductMixin,
     PerformCreateProductMixin,
+    ProductRelationsMixin,
+)
 
 
 class CategoryViewSet(ModelViewSet):
@@ -78,7 +81,12 @@ class BaseProductRelatedViewSet(ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class ProductImagesViewSet(BaseProductRelatedViewSet):
+class ProductImagesViewSet(
+    ListProductMixin,
+    PerformCreateProductMixin,
+    ProductRelationsMixin,
+    ModelViewSet,
+):
     model = ProductImage
     serializer_class = ProductImageSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -86,7 +94,9 @@ class ProductImagesViewSet(BaseProductRelatedViewSet):
     lookup_field = "image_id"
 
 
-class ProductSizesViewSet(BaseProductRelatedViewSet):
+class ProductSizesViewSet(
+    ListProductMixin, ProductRelationsMixin, ModelViewSet
+):
     model = ProductSize
     serializer_class = ProductSizeSerializer
     http_method_names = ["get", "post", "patch", "delete"]
