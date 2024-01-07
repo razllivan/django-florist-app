@@ -102,7 +102,7 @@ def category(db):
 @pytest.fixture
 def product_size_serializer_write_data(db, image_no_save_file) -> dict:
     """
-    Provides a dictionary of data for creating or updating a Product instance
+    Provides a dictionary of data for updating a Product instance
     via the ProductSizeSerializer.
 
 
@@ -111,7 +111,6 @@ def product_size_serializer_write_data(db, image_no_save_file) -> dict:
     """
     product_size = ProductSizeFactory.build()
     return {
-        "size": {"name": product_size.size.name},
         "price": product_size.price,
         "is_active": True,
     }
