@@ -51,36 +51,6 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
 
-class BaseProductRelatedViewSet(ModelViewSet):
-    model = None
-
-    def __init__(self, *args, **kwargs):
-        if not self.model:
-            raise AttributeError(
-                "Subclasses must specify the 'model' attribute"
-            )
-        super().__init__(*args, **kwargs)
-
-    def get_queryset(self):
-        if getattr(self, "swagger_fake_view", False):
-            # Return a fake queryset for schema generation
-            return self.model.objects.none()
-        product_id = self.kwargs["product_id"]
-        return self.model.objects.filter(product_id=product_id)
-
-    def perform_create(self, serializer):
-        product_id = self.kwargs.get("product_id")
-        product = get_object_or_404(Product, pk=product_id)
-        serializer.save(product=product)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        if not queryset and "product_id" in self.kwargs:
-            product_id = self.kwargs.get("product_id")
-            get_object_or_404(Product, pk=product_id)
-        return super().list(request, *args, **kwargs)
-
-
 class ProductImagesViewSet(
     ListProductMixin,
     PerformCreateProductMixin,
