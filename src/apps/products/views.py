@@ -22,12 +22,6 @@ from apps.products.serializers import (
 
 
 class CategoryViewSet(ModelViewSet):
-    """
-    Fields:
-
-        is_active (bool): Used to hide categories from the catalog.
-    """
-
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filterset_fields = ("is_active", "parent_category", "slug")
@@ -46,17 +40,6 @@ class ImageViewSet(ModelViewSet):
 
 
 class ProductViewSet(ModelViewSet):
-    """
-    Fields:
-
-        is_active (bool): Used to hide products from the catalog.
-
-        is_archived (bool): In the future, products will be marked as
-        archived instead of being deleted when referenced by an
-        order. Archiving ensures that historical data integrity is maintained
-        while the product.
-    """
-
     queryset = Product.objects.all()
     filterset_class = ProductFilter
     serializer_class = ProductSerializer
