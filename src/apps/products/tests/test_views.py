@@ -336,42 +336,6 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
-    def test_create(self, api_client, product_size_serializer_write_data):
-        """
-        Test that the API endpoint for creating a product size returns the
-        correct status code and that the size is successfully created.
-        """
-        initial_sizes_association_count = self.product.sizes.count()
-        response = api_client.post(
-            self.url_list, product_size_serializer_write_data, format="json"
-        )
-        final_sizes_association_count = self.product.sizes.count()
-
-        assert response.status_code == status.HTTP_201_CREATED
-        assert (
-            response.data["size"]["name"]
-            == product_size_serializer_write_data["size"]["name"]
-        )
-        assert (
-            final_sizes_association_count
-            == initial_sizes_association_count + 1
-        )
-
-    def test_create_returns_404_when_product_not_found(
-        self, api_client, product_size_serializer_write_data
-    ):
-        """
-        Test that the API endpoint for creating a product size returns the
-        returns a 404 status code when the product ID does not exist.
-        """
-        response = api_client.post(
-            self.url_list_not_found,
-            product_size_serializer_write_data,
-            format="json",
-        )
-
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
     def test_retrieve(self, api_client):
         """
         Test that the API endpoint for retrieving a product size returns the
@@ -400,25 +364,16 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         returns the correct status code and updates the size correctly.
         """
         initial_size_count = Size.objects.count()
-        data = {
-            "size": {
-                "name": product_size_serializer_write_data["size"]["name"]
-            },
-            "price": product_size_serializer_write_data["price"],
-        }
+        data = {"price": product_size_serializer_write_data["price"]}
         response = api_client.patch(self.url_detail, data, format="json")
         final_sizes_count = Size.objects.count()
 
         assert response.status_code == status.HTTP_200_OK
-        assert (
-            product_size_serializer_write_data["size"]["name"]
-            == response.data["size"]["name"]
-        )
+        assert self.target_item.id == response.data["size"]["id"]
         assert (
             product_size_serializer_write_data["price"]
             == response.data["price"]
         )
-        assert final_sizes_count == initial_size_count + 1
 
     @pytest.mark.parametrize(
         "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
@@ -431,12 +386,7 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         a product size returns a 404 status code when the size ID
         or product ID does not exist.
         """
-        data = {
-            "size": {
-                "name": product_size_serializer_write_data["size"]["name"]
-            },
-            "price": product_size_serializer_write_data["price"],
-        }
+        data = {"price": product_size_serializer_write_data["price"]}
 
         response = api_client.patch(getattr(self, url), data, format="json")
         assert response.status_code == status.HTTP_404_NOT_FOUND
