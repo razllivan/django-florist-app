@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from apps.products.views import (
     CategoryViewSet,
     ImageViewSet,
+    LinkProductSizeAPIView,
     ProductImagesViewSet,
     ProductSizesViewSet,
     ProductViewSet,
@@ -32,4 +33,9 @@ urlpatterns = [
     path("", include(router.urls)),
     path("products/<int:product_id>/", include(product_images_router.urls)),
     path("products/<int:product_id>/", include(product_sizes_router.urls)),
+    path(
+        "products/<int:product_id>/link-size/",
+        LinkProductSizeAPIView.as_view(),
+        name="link-product-size",
+    ),
 ]
