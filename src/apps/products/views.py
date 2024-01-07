@@ -1,4 +1,4 @@
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import CreateAPIView
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.viewsets import ModelViewSet
 
@@ -18,7 +18,10 @@ from apps.products.serializers import (
     ProductSerializer,
     ProductSizeSerializer,
     SizeSerializer,
+    LinkProductSizeSerializer,
 )
+from apps.products.mixins import (
+    PerformCreateProductMixin,
 
 
 class CategoryViewSet(ModelViewSet):
@@ -89,3 +92,7 @@ class ProductSizesViewSet(BaseProductRelatedViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
     parser_classes = (JSONParser,)
+
+class LinkProductSizeAPIView(PerformCreateProductMixin, CreateAPIView):
+    model = ProductSize
+    serializer_class = LinkProductSizeSerializer
