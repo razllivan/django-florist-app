@@ -304,6 +304,43 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
     def get_url_name(self):
         return "productsizes"
 
+    def test_create(
+        self, api_client, product_size_serializer_write_data, size
+    ):
+        """
+        Test that the API endpoint for linking size to product returns the
+        correct status code and that the size is successfully linked.
+        """
+        initial_sizes_association_count = self.product.sizes.count()
+        data = {"size": size.id, **product_size_serializer_write_data}
+        response = api_client.post(self.url_list, data, format="json")
+        final_sizes_association_count = self.product.sizes.count()
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["size"] == size.id
+
+        assert (
+            final_sizes_association_count
+            == initial_sizes_association_count + 1
+        )
+
+    def test_create_returns_404_when_product_not_found(
+        self, api_client, product_size_serializer_write_data, size
+    ):
+        """
+        Test that the API endpoint for linking size to product returns the
+        returns a 404 status code when the product ID does not exist.
+        """
+        data = {"size": size.id, **product_size_serializer_write_data}
+
+        response = api_client.post(
+            self.url_list_not_found,
+            data,
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
     def test_list(self, api_client):
         """
         Test that the API endpoint for listing product sizes returns the
