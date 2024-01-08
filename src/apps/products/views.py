@@ -21,6 +21,10 @@ from apps.products.serializers import (
     SizeSerializer,
     LinkProductSizeSerializer,
 )
+from drf_spectacular.utils import extend_schema_view
+from apps.products.schema import (
+    ProductSizesSchema,
+)
 from apps.products.mixins import (
     ListProductMixin,
     PerformCreateProductMixin,
@@ -65,6 +69,13 @@ class ProductImagesViewSet(
     lookup_field = "image_id"
 
 
+@extend_schema_view(
+    list=ProductSizesSchema().list(),
+    create=ProductSizesSchema().create(),
+    retrieve=ProductSizesSchema().retrieve(),
+    partial_update=ProductSizesSchema().partial_update(),
+    destroy=ProductSizesSchema().destroy(),
+)
 class ProductSizesViewSet(
     ListProductMixin,
     PerformCreateProductMixin,
