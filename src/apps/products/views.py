@@ -66,7 +66,10 @@ class ProductImagesViewSet(
 
 
 class ProductSizesViewSet(
-    ListProductMixin, ProductRelationsMixin, ModelViewSet
+    ListProductMixin,
+    PerformCreateProductMixin,
+    ProductRelationsMixin,
+    ModelViewSet,
 ):
     model = ProductSize
     serializer_class = ProductSizeSerializer
