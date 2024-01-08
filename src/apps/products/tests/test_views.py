@@ -363,10 +363,8 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         Test that the API endpoint for partially updating a product size
         returns the correct status code and updates the size correctly.
         """
-        initial_size_count = Size.objects.count()
         data = {"price": product_size_serializer_write_data["price"]}
         response = api_client.patch(self.url_detail, data, format="json")
-        final_sizes_count = Size.objects.count()
 
         assert response.status_code == status.HTTP_200_OK
         assert self.target_item.id == response.data["size"]["id"]
