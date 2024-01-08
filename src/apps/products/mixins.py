@@ -65,3 +65,32 @@ class PerformCreateProductMixin:
         product_id = self.kwargs.get("product_id")
         product = get_object_or_404(Product, pk=product_id)
         serializer.save(product=product)
+
+
+class CreateMixin:
+    """
+    A mixin that allows specifying a separate serializer for the create method.
+
+    Attributes:
+        serializer_create_class (Serializer): The serializer class to be used
+         for creating objects.
+
+    Raises:
+        AttributeError: If the 'serializer_create_class' attribute is not
+         specified in subclasses.
+    """
+
+    serializer_create_class = None
+
+    def __init__(self, *args, **kwargs):
+        if not self.serializer_create_class:
+            raise AttributeError(
+                "Subclasses must specify the 'serializer_create_class' "
+                "attribute"
+            )
+        super().__init__(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return self.serializer_create_class
+        return super().get_serializer_class()
