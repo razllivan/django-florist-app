@@ -7,6 +7,7 @@ from apps.products.tests.factories import (
     ProductFactory,
     ProductImageFactory,
     ProductSizeFactory,
+    SizeFactory,
 )
 
 
@@ -114,3 +115,8 @@ def product_size_serializer_write_data(db, image_no_save_file) -> dict:
         "price": product_size.price,
         "is_active": True,
     }
+
+
+@pytest.fixture
+def size(db):
+    return SizeFactory()
