@@ -1,5 +1,6 @@
-from rest_framework.generics import CreateAPIView
+from rest_framework import status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
@@ -73,6 +74,16 @@ class ProductSizesViewSet(
     lookup_field = "size_id"
     parser_classes = (JSONParser,)
 
-class LinkProductSizeAPIView(PerformCreateProductMixin, CreateAPIView):
-    model = ProductSize
-    serializer_class = LinkProductSizeSerializer
+    def get_serializer_class(self):
+        if self.action == "create":
+            return LinkProductSizeSerializer
+        return super().get_serializer_class()
+
+    def create(self, request, *args, **kwargs):
+        serializer = LinkProductSizeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
