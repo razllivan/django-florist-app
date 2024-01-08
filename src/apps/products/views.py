@@ -1,9 +1,15 @@
+from drf_spectacular.utils import extend_schema_view
 from rest_framework import status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
+from apps.products.mixins import (
+    ListProductMixin,
+    PerformCreateProductMixin,
+    ProductRelationsMixin,
+)
 from apps.products.models import (
     Category,
     Image,
@@ -12,23 +18,15 @@ from apps.products.models import (
     ProductSize,
     Size,
 )
+from apps.products.schema import ProductImagesSchema, ProductSizesSchema
 from apps.products.serializers import (
     CategorySerializer,
     ImageSerializer,
+    LinkProductSizeSerializer,
     ProductImageSerializer,
     ProductSerializer,
     ProductSizeSerializer,
     SizeSerializer,
-    LinkProductSizeSerializer,
-)
-from drf_spectacular.utils import extend_schema_view
-from apps.products.schema import (
-    ProductSizesSchema,
-)
-from apps.products.mixins import (
-    ListProductMixin,
-    PerformCreateProductMixin,
-    ProductRelationsMixin,
 )
 
 
@@ -56,6 +54,13 @@ class ProductViewSet(ModelViewSet):
     serializer_class = ProductSerializer
 
 
+@extend_schema_view(
+    list=ProductImagesSchema().list(),
+    create=ProductImagesSchema().create(),
+    retrieve=ProductImagesSchema().retrieve(),
+    partial_update=ProductImagesSchema().partial_update(),
+    destroy=ProductImagesSchema().destroy(),
+)
 class ProductImagesViewSet(
     ListProductMixin,
     PerformCreateProductMixin,
