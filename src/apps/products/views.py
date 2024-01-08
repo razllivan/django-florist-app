@@ -1,11 +1,10 @@
 from drf_spectacular.utils import extend_schema_view
-from rest_framework import status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
-from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
 from apps.products.mixins import (
+    CreateMixin,
     ListProductMixin,
     PerformCreateProductMixin,
     ProductRelationsMixin,
@@ -83,26 +82,14 @@ class ProductImagesViewSet(
 )
 class ProductSizesViewSet(
     ListProductMixin,
+    CreateMixin,
     PerformCreateProductMixin,
     ProductRelationsMixin,
     ModelViewSet,
 ):
     model = ProductSize
     serializer_class = ProductSizeSerializer
+    serializer_create_class = LinkProductSizeSerializer
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
     parser_classes = (JSONParser,)
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return LinkProductSizeSerializer
-        return super().get_serializer_class()
-
-    def create(self, request, *args, **kwargs):
-        serializer = LinkProductSizeSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
-        )
