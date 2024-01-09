@@ -21,8 +21,10 @@ from apps.products.schema import ProductImagesSchema, ProductSizesSchema
 from apps.products.serializers import (
     CategorySerializer,
     ImageSerializer,
+    LinkProductCategorySerializer,
     LinkProductImageSerializer,
     LinkProductSizeSerializer,
+    ProductCategorySerializer,
     ProductImageSerializer,
     ProductSerializer,
     ProductSizeSerializer,
@@ -95,3 +97,17 @@ class ProductSizesViewSet(
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
     parser_classes = (JSONParser,)
+
+
+class ProductCategoriesViewSet(
+    ListProductMixin,
+    CreateMixin,
+    PerformCreateProductMixin,
+    ProductRelationsMixin,
+    ModelViewSet,
+):
+    model = Product.categories.through
+    serializer_class = ProductCategorySerializer
+    serializer_create_class = LinkProductCategorySerializer
+    http_method_names = ["get", "post", "delete"]
+    lookup_field = "category_id"
