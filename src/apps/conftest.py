@@ -38,7 +38,7 @@ def product(db):
 
 
 @pytest.fixture
-def products_without_associations(db, image_no_save_file):
+def products_without_associations(db):
     return ProductFactory.create_batch(10)
 
 
@@ -101,7 +101,7 @@ def category(db):
 
 
 @pytest.fixture
-def product_size_serializer_write_data(db, image_no_save_file) -> dict:
+def product_size_serializer_write_data(db) -> dict:
     """
     Provides a dictionary of data for updating a Product instance
     via the ProductSizeSerializer.
