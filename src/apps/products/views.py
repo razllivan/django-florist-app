@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema_view
-from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.parsers import JSONParser, MultiPartParser
 from rest_framework.viewsets import ModelViewSet
 
 from apps.products.filters import ProductFilter
@@ -21,6 +21,7 @@ from apps.products.schema import ProductImagesSchema, ProductSizesSchema
 from apps.products.serializers import (
     CategorySerializer,
     ImageSerializer,
+    LinkProductImageSerializer,
     LinkProductSizeSerializer,
     ProductImageSerializer,
     ProductSerializer,
@@ -62,13 +63,14 @@ class ProductViewSet(ModelViewSet):
 )
 class ProductImagesViewSet(
     ListProductMixin,
+    CreateMixin,
     PerformCreateProductMixin,
     ProductRelationsMixin,
     ModelViewSet,
 ):
     model = ProductImage
     serializer_class = ProductImageSerializer
-    parser_classes = (MultiPartParser, FormParser)
+    serializer_create_class = LinkProductImageSerializer
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "image_id"
 
