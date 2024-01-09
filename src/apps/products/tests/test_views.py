@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from apps.products.models import Image, Product, Size
+from apps.products.models import Category, Image, Product, Size
 from apps.products.tests.factories import ProductFactory
 
 
@@ -441,6 +441,140 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         """
         Test that the API endpoint for deleting a product image returns a 404
         status code when the size ID or product ID does not exist.
+        """
+
+        response = api_client.delete(getattr(self, url))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestProductCategoriesViewSet(ProductRelatedViewSetTestBase):
+    def get_item_id_name(self):
+        return "category_id"
+
+    def get_target_item(self, product):
+        return product.categories.all()[2]
+
+    def get_url_name(self):
+        return "productcategories"
+
+    def test_create(self, api_client, category):
+        """
+        Test that the API endpoint for linking category to product returns the
+        correct status code and that the size is successfully linked.
+        """
+        initial_categories_association_count = self.product.categories.count()
+        data = {"category": category.id}
+        response = api_client.post(self.url_list, data, format="json")
+        final_categories_association_count = self.product.categories.count()
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["category"] == category.id
+
+        assert (
+            final_categories_association_count
+            == initial_categories_association_count + 1
+        )
+
+    def test_create_returns_404_when_product_not_found(
+        self, api_client, category
+    ):
+        """
+        Test that the API endpoint for linking category to product returns the
+        returns a 404 status code when the product ID does not exist.
+        """
+        data = {"category": category.id}
+
+        response = api_client.post(
+            self.url_list_not_found,
+            data,
+            format="json",
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_list(self, api_client):
+        """
+        Test that the API endpoint for listing product categories returns the
+        correct status code and the correct number of categories.
+        """
+        response = api_client.get(self.url_list)
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) == self.product.categories.count()
+
+    def test_list_returns_404_when_product_not_found(self, api_client):
+        """
+        Test that the API endpoint for listing product categories returns a 404
+        status code when the product ID does not exist.
+        """
+
+        response = api_client.get(self.url_list_not_found)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_list_returns_empty(
+        self, api_client, products_without_associations
+    ):
+        """
+        Test that the API endpoint for listing product catergories returns an
+        empty list when the product has no sizes.
+        """
+        product = products_without_associations[5]
+
+        response = api_client.get(self.build_url(product_id=product.id))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data == []
+
+    def test_retrieve(self, api_client):
+        """
+        Test that the API endpoint for retrieving a product category returns
+        the correct status code and the correct category.
+        """
+        response = api_client.get(self.url_detail)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["category"]["id"] == self.target_item.id
+
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_retrieve_returns_404_when_param_not_found(self, api_client, url):
+        """
+        Test that the API endpoint for retrieving a product category returns a
+        404 status code when the size ID or product ID does not exist.
+        """
+        response = api_client.get(getattr(self, url))
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_destroy(self, api_client):
+        """
+        Test the deletion of a product category via the API endpoint.
+
+        This test verifies that when a product category is deleted,
+        the API returns the correct status code
+        and successfully removes the association between the category
+        and the product.
+        The test also ensures that the category itself is not deleted
+        """
+        initial_categories_association_count = self.product.categories.count()
+        initial_categories_count = Category.objects.count()
+        response = api_client.delete(self.url_detail)
+        final_categories_association_count = self.product.categories.count()
+        final_categories_count = Category.objects.count()
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not self.product.categories.filter(pk=self.target_item.id)
+        assert (
+            final_categories_association_count
+            == initial_categories_association_count - 1
+        )
+        assert final_categories_count == initial_categories_count
+
+    @pytest.mark.parametrize(
+        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
+    )
+    def test_destroy_returns_404_when_param_not_found(self, api_client, url):
+        """
+        Test that the API endpoint for deleting a product category returns a
+        404 status code when the size ID or product ID does not exist.
         """
 
         response = api_client.delete(getattr(self, url))
