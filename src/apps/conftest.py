@@ -120,3 +120,17 @@ def product_size_serializer_write_data(db, image_no_save_file) -> dict:
 @pytest.fixture
 def size(db):
     return SizeFactory()
+
+
+@pytest.fixture
+def product_image_serializer_write_data(db) -> dict:
+    """
+    Provides a dictionary of data for updating a Product instance
+    via the ProductImageSerializer.
+
+
+    Use this fixture when testing the ProductSizeSerializer
+    with write operations.
+    """
+    product_image = ProductImageFactory.build()
+    return {"is_preview": product_image.is_preview}
