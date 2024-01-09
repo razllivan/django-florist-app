@@ -18,6 +18,26 @@ class CategorySerializer(ModelSerializer):
         fields = "__all__"
 
 
+class ProductCategorySerializer(ModelSerializer):
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        model = Product.categories.through
+        fields = [
+            "category",
+        ]
+
+
+class LinkProductCategorySerializer(ModelSerializer):
+    category = PrimaryKeyRelatedField(queryset=Category.objects.all())
+
+    class Meta:
+        model = Product.categories.through
+        fields = [
+            "category",
+        ]
+
+
 class SizeSerializer(ModelSerializer):
     class Meta:
         model = Size
