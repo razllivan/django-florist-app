@@ -1,11 +1,10 @@
-import os.path
 from abc import ABC, abstractmethod
 
 import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from apps.products.models import Image, Product, ProductImage, Size
+from apps.products.models import Image, Product, Size
 from apps.products.tests.factories import ProductFactory
 
 
@@ -95,32 +94,47 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
-    def test_create(self, api_client, image_no_save_file):
-        """
-        Test that the API endpoint for creating a product image returns the
-        correct status code and that the image is successfully created.
-        """
-        image_file = image_no_save_file.build().img
-        data = {"new_image": image_file}
-        response = api_client.post(self.url_list, data)
-
-        db_image_filename = os.path.basename(
-            self.product.images.get(pk=response.data["image"]["id"]).img.name
-        )
-        uploaded_image_filename = data["new_image"].name
-        assert response.status_code == status.HTTP_201_CREATED
-        assert db_image_filename == uploaded_image_filename
-
-    def test_create_returns_404_when_product_not_found(
-        self, api_client, image_no_save_file
+    def test_create(
+        self,
+        api_client,
+        image_no_save_file,
+        product_image_serializer_write_data,
     ):
         """
-        Test that the API endpoint for creating a product image returns the
+        Test that the API endpoint for linking image to product returns the
+        correct status code and that the image is successfully linked.
+        """
+        image = image_no_save_file.create()
+        initial_images_association_count = self.product.images.count()
+        data = {"image": image.id, **product_image_serializer_write_data}
+        response = api_client.post(self.url_list, data)
+        final_images_association_count = self.product.images.count()
+
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data["image"] == image.id
+        assert (
+            final_images_association_count
+            == initial_images_association_count + 1
+        )
+
+    def test_create_returns_404_when_product_not_found(
+        self,
+        api_client,
+        image_no_save_file,
+        product_image_serializer_write_data,
+    ):
+        """
+        Test that the API endpoint for linking image to product returns the
         returns a 404 status code when the product ID does not exist.
         """
-        image_file = image_no_save_file.build().img
-        data = {"new_image": image_file}
-        response = api_client.post(self.url_list_not_found, data)
+        image = image_no_save_file.create()
+        data = {"image": image.id, **product_image_serializer_write_data}
+
+        response = api_client.post(
+            self.url_list_not_found,
+            data,
+            format="json",
+        )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -144,43 +158,40 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
         response = api_client.get(getattr(self, url))
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_partial_update(self, api_client, image_no_save_file):
+    def test_partial_update(
+        self, api_client, product_image_serializer_write_data
+    ):
         """
         Test that the API endpoint for partially updating a product image
         returns the correct status code and updates the image correctly.
         """
-        initial_images_count = Image.objects.count()
-        image_file = image_no_save_file.build().img
-        data = {"new_image": image_file}
-        response = api_client.patch(self.url_detail, data)
-        final_images_count = Image.objects.count()
+        data = product_image_serializer_write_data
+        response = api_client.patch(self.url_detail, data, format="json")
 
-        db_image_filename = os.path.basename(
-            self.product.images.get(pk=response.data["image"]["id"]).img.name
-        )
-        uploaded_image_filename = data["new_image"].name
         assert response.status_code == status.HTTP_200_OK
-        assert db_image_filename == uploaded_image_filename
-        assert final_images_count == initial_images_count + 1
+        assert self.target_item.id == response.data["image"]["id"]
+        assert (
+            product_image_serializer_write_data["is_preview"]
+            == response.data["is_preview"]
+        )
 
     @pytest.mark.parametrize(
         "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
     )
     def test_partial_update_returns_404_when_param_not_found(
-        self, api_client, image_no_save_file, url
+        self, api_client, url, product_image_serializer_write_data
     ):
         """
         Test that the API endpoint for partially updating
         a product image returns a 404 status code when the image ID
         or product ID does not exist.
         """
-        image_file = image_no_save_file.build().img
-        data = {"new_image": image_file}
+        data = product_image_serializer_write_data
 
         response = api_client.patch(getattr(self, url), data)
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_destroy(self, api_client, image_no_save_file):
+    def test_destroy(self, api_client):
         """
         Test the deletion of a product image via the API endpoint.
 
@@ -214,33 +225,6 @@ class TestProductImagesViewSet(ProductRelatedViewSetTestBase):
 
         response = api_client.delete(getattr(self, url))
         assert response.status_code == status.HTTP_404_NOT_FOUND
-
-    @pytest.mark.parametrize("is_preview", [True, False])
-    def test_update_preview_status(self, api_client, is_preview):
-        """
-        Test that the API endpoint for updating the preview status of a product
-        image returns the correct status code
-        and updates the preview status correctly.
-        """
-        data = {"is_preview": is_preview}
-        response = api_client.patch(self.url_detail, data)
-        assert response.status_code == status.HTTP_200_OK
-        assert (
-            ProductImage.objects.get(
-                product=self.product, image=self.target_item
-            ).is_preview
-            is is_preview
-        )
-
-    def test_invalid_image_file(self, api_client):
-        """
-        Test that the API endpoint returns the correct status code
-        when an invalid image file is provided.
-        """
-
-        data = {"new_image": "invalid_image_file"}
-        response = api_client.patch(self.url_detail, data)
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 @pytest.mark.django_db
