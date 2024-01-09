@@ -423,16 +423,16 @@ class TestProductSizesViewSet(ProductRelatedViewSetTestBase):
         initial_sizes_association_count = self.product.sizes.count()
         initial_sizes_count = Size.objects.count()
         response = api_client.delete(self.url_detail)
-        final_images_association_count = self.product.sizes.count()
-        final_images_count = Size.objects.count()
+        final_sizes_association_count = self.product.sizes.count()
+        final_sizes_count = Size.objects.count()
 
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not self.product.images.filter(pk=self.target_item.id)
         assert (
-            final_images_association_count
+            final_sizes_association_count
             == initial_sizes_association_count - 1
         )
-        assert final_images_count == initial_sizes_count
+        assert final_sizes_count == initial_sizes_count
 
     @pytest.mark.parametrize(
         "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
