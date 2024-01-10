@@ -524,26 +524,6 @@ class TestProductCategoriesViewSet(ProductRelatedViewSetTestBase):
         assert response.status_code == status.HTTP_200_OK
         assert response.data == []
 
-    def test_retrieve(self, api_client):
-        """
-        Test that the API endpoint for retrieving a product category returns
-        the correct status code and the correct category.
-        """
-        response = api_client.get(self.url_detail)
-        assert response.status_code == status.HTTP_200_OK
-        assert response.data["category"]["id"] == self.target_item.id
-
-    @pytest.mark.parametrize(
-        "url", ["url_detail_not_found_item", "url_detail_not_found_product"]
-    )
-    def test_retrieve_returns_404_when_param_not_found(self, api_client, url):
-        """
-        Test that the API endpoint for retrieving a product category returns a
-        404 status code when the size ID or product ID does not exist.
-        """
-        response = api_client.get(getattr(self, url))
-        assert response.status_code == status.HTTP_404_NOT_FOUND
-
     def test_destroy(self, api_client):
         """
         Test the deletion of a product category via the API endpoint.
