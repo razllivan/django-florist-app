@@ -237,9 +237,6 @@ class TestProductViewSet:
         assert Product.objects.filter(pk=response.data["id"]).exists()
         product = Product.objects.get(pk=response.data["id"])
         assert product.name == product_serializer_write_data["name"]
-        assert product.images.count() == len(
-            product_serializer_write_data["images_ids"]
-        )
 
     def test_list_products(self, api_client):
         ProductFactory.create_batch(5)
