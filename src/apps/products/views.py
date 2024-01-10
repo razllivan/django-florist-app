@@ -1,6 +1,6 @@
 from drf_spectacular.utils import extend_schema_view
 from rest_framework import mixins as drf_mixins
-from rest_framework.parsers import JSONParser, MultiPartParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from apps.products.filters import ProductFilter
@@ -101,7 +101,6 @@ class ProductSizesViewSet(
     serializer_create_class = LinkProductSizeSerializer
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
-    parser_classes = (JSONParser,)
 
 
 @extend_schema_view(
