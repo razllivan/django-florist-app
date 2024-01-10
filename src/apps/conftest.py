@@ -69,14 +69,10 @@ def product_serializer_write_data(db, image_no_save_file) -> dict:
     with write operations.
     """
     product = ProductFactory.build()
-    categories = CategoryFactory.create_batch(2)
-    images = image_no_save_file.create_batch(3)
 
     return {
         "name": product.name,
         "description": product.description,
-        "categories_ids": [category.id for category in categories],
-        "images_ids": [image.id for image in images],
     }
 
 
