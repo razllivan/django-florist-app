@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema_view
+from rest_framework import mixins as drf_mixins
 from rest_framework.parsers import JSONParser, MultiPartParser
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from apps.products.filters import ProductFilter
 from apps.products.mixins import (
@@ -101,13 +102,13 @@ class ProductSizesViewSet(
 
 class ProductCategoriesViewSet(
     ListProductMixin,
-    CreateMixin,
     PerformCreateProductMixin,
+    CreateMixin,
     ProductRelationsMixin,
-    ModelViewSet,
+    drf_mixins.DestroyModelMixin,
+    GenericViewSet,
 ):
     model = Product.categories.through
     serializer_class = ProductCategorySerializer
     serializer_create_class = LinkProductCategorySerializer
-    http_method_names = ["get", "post", "delete"]
     lookup_field = "category_id"
