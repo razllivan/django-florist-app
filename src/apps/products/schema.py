@@ -82,3 +82,26 @@ class ProductImagesSchema:
             To delete the image itself you need to use the `/api/images`
             endpoint""",
         )
+
+
+class ProductCategoriesSchema:
+    def list(self):
+        return extend_schema(
+            summary="Get all categories related to the product",
+            description="Get all categories related to the product",
+        )
+
+    def create(self):
+        return extend_schema(
+            summary="Add category to product",
+            description="Add category to product",
+        )
+
+    def destroy(self):
+        return extend_schema(
+            summary="Remove product image",
+            description="""Remove only association between image and product.
+            <br>
+            To delete the image itself you need to use the `/api/images`
+            endpoint""",
+        )

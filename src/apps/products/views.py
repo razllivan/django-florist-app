@@ -18,7 +18,11 @@ from apps.products.models import (
     ProductSize,
     Size,
 )
-from apps.products.schema import ProductImagesSchema, ProductSizesSchema
+from apps.products.schema import (
+    ProductCategoriesSchema,
+    ProductImagesSchema,
+    ProductSizesSchema,
+)
 from apps.products.serializers import (
     CategorySerializer,
     ImageSerializer,
@@ -100,6 +104,11 @@ class ProductSizesViewSet(
     parser_classes = (JSONParser,)
 
 
+@extend_schema_view(
+    create=ProductCategoriesSchema().create(),
+    list=ProductCategoriesSchema().list(),
+    destroy=ProductCategoriesSchema().destroy(),
+)
 class ProductCategoriesViewSet(
     ListProductMixin,
     PerformCreateProductMixin,
