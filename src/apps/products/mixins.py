@@ -1,9 +1,10 @@
+from rest_framework import mixins
 from rest_framework.generics import get_object_or_404
 
 from apps.products.models import Product
 
 
-class ListProductMixin:
+class ListProductMixin(mixins.ListModelMixin):
     """
     A mixin for listing products.
 
@@ -67,7 +68,7 @@ class PerformCreateProductMixin:
         serializer.save(product=product)
 
 
-class CreateMixin:
+class CreateMixin(mixins.CreateModelMixin):
     """
     A mixin that allows specifying a separate serializer for the create method.
 
