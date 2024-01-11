@@ -10,8 +10,18 @@ from apps.products.models import (
 )
 
 
+class ImageSerializer(ModelSerializer):
+    class Meta:
+        model = Image
+        fields = "__all__"
+
+
 class CategorySerializer(ModelSerializer):
     child_categories = PrimaryKeyRelatedField(many=True, read_only=True)
+    image = ImageSerializer(read_only=True)
+    image_id = PrimaryKeyRelatedField(
+        write_only=True, queryset=Image.objects.all()
+    )
 
     class Meta:
         model = Category
@@ -66,12 +76,6 @@ class LinkProductSizeSerializer(ModelSerializer):
             "price",
             "is_active",
         ]
-
-
-class ImageSerializer(ModelSerializer):
-    class Meta:
-        model = Image
-        fields = "__all__"
 
 
 class ProductImageSerializer(ModelSerializer):

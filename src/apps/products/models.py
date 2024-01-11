@@ -4,6 +4,18 @@ from autoslug import AutoSlugField
 from django.db import models
 
 
+class Image(models.Model):
+    img = models.ImageField(upload_to="images/")
+    size_description = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Product size info in the picture",
+    )
+
+    def __str__(self):
+        return os.path.basename(self.img.name)
+
+
 class Category(models.Model):
     name = models.CharField(
         max_length=200, help_text="The name of the category."
@@ -26,6 +38,16 @@ class Category(models.Model):
         related_name="child_categories",
         help_text="id to the parent category for hierarchical structuring.",
     )
+    image = models.ForeignKey(
+        Image,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        help_text="Image of the category",
+    )
+    description = models.TextField(
+        blank=True, help_text="A description of the category"
+    )
 
     def __str__(self):
         return self.name
@@ -36,18 +58,6 @@ class Size(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Image(models.Model):
-    img = models.ImageField(upload_to="images/")
-    size_description = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Product size info in the picture",
-    )
-
-    def __str__(self):
-        return os.path.basename(self.img.name)
 
 
 class Product(models.Model):
