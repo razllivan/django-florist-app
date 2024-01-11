@@ -9,7 +9,7 @@ class NumberInFilter(BaseInFilter, NumberFilter):
 
 
 class ProductFilter(django_filters.FilterSet):
-    no_categories = django_filters.BooleanFilter(
+    uncategorized = django_filters.BooleanFilter(
         field_name="categories", lookup_expr="isnull", distinct=True
     )
     categories = NumberInFilter(
@@ -19,7 +19,7 @@ class ProductFilter(django_filters.FilterSet):
     class Meta:
         model = Product
         fields = [
-            "no_categories",
+            "uncategorized",
             "categories",
             "slug",
             "is_active",

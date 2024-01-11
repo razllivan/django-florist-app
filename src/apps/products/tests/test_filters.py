@@ -23,7 +23,7 @@ def test_no_categories_filter_excludes_categorized_products(category):
 
     # apply filter 'no_categories'
     no_categories_filter = ProductFilter(
-        {"no_categories": True}, queryset=Product.objects.all()
+        {"uncategorized": True}, queryset=Product.objects.all()
     )
 
     # Check that a product without a category is returned by the filter
