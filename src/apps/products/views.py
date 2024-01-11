@@ -101,6 +101,7 @@ class ProductSizesViewSet(
     serializer_create_class = LinkProductSizeSerializer
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "size_id"
+    filterset_fields = ("is_active",)
 
 
 @extend_schema_view(
