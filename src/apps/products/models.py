@@ -24,8 +24,12 @@ class Category(models.Model):
         populate_from="name",
         unique=True,
         db_index=True,
-        always_update=True,
-        help_text="Unique slug generated from the category name for URL.",
+        blank=True,
+        editable=True,
+        help_text="Automatically generates a unique slug from the name when "
+        "creating the object for URL purposes. The slug remains "
+        "unchanged even if the name is modified, and it needs to "
+        "be updated manually if necessary.",
     )
     is_active = models.BooleanField(
         default=True, db_index=True, help_text="Hide category from the catalog"
@@ -68,8 +72,12 @@ class Product(models.Model):
         populate_from="name",
         unique=True,
         db_index=True,
-        always_update=True,
-        help_text="Unique slug generated from the category name for URL.",
+        blank=True,
+        editable=True,
+        help_text="Automatically generates a unique slug from the name when "
+        "creating the object for URL purposes. The slug remains "
+        "unchanged even if the name is modified, and it needs to "
+        "be updated manually if necessary.",
     )
     is_active = models.BooleanField(
         default=True,
