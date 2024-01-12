@@ -20,7 +20,7 @@ class CategorySerializer(ModelSerializer):
     child_categories = PrimaryKeyRelatedField(many=True, read_only=True)
     image = ImageSerializer(read_only=True)
     image_id = PrimaryKeyRelatedField(
-        write_only=True, queryset=Image.objects.all()
+        write_only=True, queryset=Image.objects.all(), required=False
     )
 
     class Meta:
