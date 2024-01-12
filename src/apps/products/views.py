@@ -121,3 +121,4 @@ class ProductCategoriesViewSet(
     serializer_class = ProductCategorySerializer
     serializer_create_class = LinkProductCategorySerializer
     lookup_field = "category_id"
+    filterset_fields = ("category__is_active",)
