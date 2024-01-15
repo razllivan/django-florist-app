@@ -104,6 +104,9 @@ class ProductImagesViewSet(
     http_method_names = ["get", "post", "patch", "delete"]
     lookup_field = "image_id"
 
+    def get_queryset(self):
+        return super().get_queryset().select_related("image")
+
 
 @extend_schema_view(
     list=ProductSizesSchema().list(),
