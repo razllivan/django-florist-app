@@ -1,10 +1,11 @@
 from rest_framework import mixins
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
 from apps.products.models import Product
 
 
-class ListProductMixin(mixins.ListModelMixin):
+class ListProductMixin:
     """
     A mixin for listing products.
 
@@ -21,7 +22,14 @@ class ListProductMixin(mixins.ListModelMixin):
         if not queryset and "product_id" in self.kwargs:
             product_id = self.kwargs.get("product_id")
             get_object_or_404(Product, pk=product_id)
-        return super().list(request, *args, **kwargs)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class ProductRelationsMixin:
