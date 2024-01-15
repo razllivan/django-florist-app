@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from drf_spectacular.utils import extend_schema_view
 from rest_framework import mixins as drf_mixins
 from rest_framework.parsers import MultiPartParser
@@ -56,7 +57,20 @@ class ImageViewSet(ModelViewSet):
 
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related(
+        Prefetch(
+            "categories",
+            queryset=Category.objects.prefetch_related("child_categories"),
+        ),
+        Prefetch(
+            "productimage_set",
+            queryset=ProductImage.objects.select_related("image"),
+        ),
+        Prefetch(
+            "productsize_set",
+            queryset=ProductSize.objects.select_related("size"),
+        ),
+    ).all()
     filterset_class = ProductFilter
     serializer_class = ProductSerializer
 
