@@ -129,6 +129,9 @@ class ProductSizesViewSet(
     lookup_field = "size_id"
     filterset_fields = ("is_active",)
 
+    def get_queryset(self):
+        return super().get_queryset().select_related("size")
+
 
 @extend_schema_view(
     create=ProductCategoriesSchema().create(),
