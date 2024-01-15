@@ -39,7 +39,16 @@ from apps.products.serializers import (
 
 
 class CategoryViewSet(ModelViewSet):
-    queryset = Category.objects.all()
+    queryset = (
+        Category.objects.select_related("image")
+        .prefetch_related(
+            Prefetch(
+                "child_categories",
+                queryset=Category.objects.only("id", "parent_category_id"),
+            )
+        )
+        .all()
+    )
     serializer_class = CategorySerializer
     filterset_fields = ("is_active", "parent_category", "slug")
 
