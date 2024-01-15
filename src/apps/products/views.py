@@ -151,3 +151,16 @@ class ProductCategoriesViewSet(
     serializer_create_class = LinkProductCategorySerializer
     lookup_field = "category_id"
     filterset_fields = ("category__is_active",)
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related("category")
+            .prefetch_related(
+                Prefetch(
+                    "category__child_categories",
+                    queryset=Category.objects.only("id", "parent_category_id"),
+                )
+            )
+        )
