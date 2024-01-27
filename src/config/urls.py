@@ -29,6 +29,7 @@ urlpatterns = [
         name="docs",
     ),
     path("api/", include("apps.products.urls", namespace="api")),
+    path("api/auth/", include("apps.jwt_auth.urls", namespace="auth")),
 ]
 
 if settings.DEBUG:
