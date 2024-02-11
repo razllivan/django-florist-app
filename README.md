@@ -59,10 +59,10 @@ git clone https://github.com/razllivan/django-florist-app.git &&
 cd django-florist-app
 ```
 
-2. Copy the example .env file and set the necessary environment variables:
+2. Copy and rename the sample .env file and set the necessary environment variables:
 
 ```bash
-cp .envs/.local/.env.example .envs/.local/.env
+cp .envs/.local/.env.sample .envs/.local/.env
 ```
 
 3. Launch the development services using Docker Compose:
